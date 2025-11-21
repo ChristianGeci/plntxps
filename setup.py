@@ -3,14 +3,15 @@ from setuptools import setup
 setup(
     name='plntxps',
     version='0.1.0',    
-    description='XPS tools',
+    description='XPS analysis tools',
     #url='https://github.com/ChristianGeci/fluorCalc',
     author='Christian Geci',
     author_email='christian.geci@maine.edu',
     license='MIT license',
     packages=['plntxps'],
-    install_requires=['scipy',
+    install_requires=[
                       'numpy',
+                      'scipy',
                       'matplotlib',
                       ],
 
