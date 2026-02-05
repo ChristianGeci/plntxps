@@ -4,3 +4,4 @@ tests/fermi_edge_linfit.png
 tests/fermi_edge_linfit.svg
 tests/fermi_edge_seconddir.png
 tests/fermi_edge_seconddir.svg
+tests/.ipynb_checkpoints
