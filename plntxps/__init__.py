@@ -1,4 +1,4 @@
-from .plnt_xps import *
+from .plntxps import *
 
 __version__ = "0.1.0"
 __author__ = 'Christian Geci'

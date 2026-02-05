@@ -1,2 +1,6 @@
 build/lib/plntxps
 plntxps.egg-info
+tests/fermi_edge_linfit.png
+tests/fermi_edge_linfit.svg
+tests/fermi_edge_seconddir.png
+tests/fermi_edge_seconddir.svg

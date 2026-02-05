@@ -7,8 +7,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import copy
-
-
+from dataclasses import dataclass
 
 from contextlib import contextmanager
 @contextmanager
@@ -18,9 +17,6 @@ def autoscale_turned_off(ax=None):
   yield
   ax.set_xlim(*lims[0])
   ax.set_ylim(*lims[1])
-
-
-
 
 class datafile:
     
@@ -144,14 +140,14 @@ class datafile:
     def spectra(self):
         Spectra = []
         for index, Spectrum in enumerate(self.spectrum_names):
-            Spectra.append(spectrum(self, index))
+            Spectra.append(read_spectrum(self, index))
         return Spectra    
     
     @property
     def operations(self):
         Operations = []
         for index, Operation in enumerate(self.operation_names):
-            Operations.append(operation(self, index))
+            Operations.append(read_operation(self, index))
         return Operations
     
     def organize_charging_kinetics(self, region_name):
@@ -625,7 +621,6 @@ class datafile:
     #@property
     #def fermi_level(self): #calculates the fermi level via the second derivative method
 
-
 class charge_reference_spline:
     def __init__(self, name, times, centers, uncertainties, s):
         self.times = times
@@ -636,17 +631,17 @@ class charge_reference_spline:
         self.spline = sp.interpolate.BSpline(*self.tck)(self.t)
         self.name = name
         
-    def interpolate(self, t):
+    def interpolate(self, t):    
         return sp.interpolate.BSpline(*self.tck)(t)
     
     
+@dataclass
 class spectrum:
-    def __init__(self, data_file, index):
-        self.counts = data_file.spectrum_counts[index]
-        self.eV = data_file.spectrum_eV[index]
-        self.name = data_file.spectrum_names[index]
-        self.comment = data_file.spectrum_comments[index]
-        self.time = data_file.spectrum_times[index]
+    counts: np.ndarray
+    eV: np.ndarray
+    name: str
+    comment: str
+    time: float
         
     def plot(self, ax = None, **kwargs):
         print(f'{self.name}    {self.comment}')
@@ -656,16 +651,23 @@ class spectrum:
         else:
             ax.plot(self.eV, self.counts, **kwargs)
             ax.xaxis.set_inverted(True)
+
+def read_spectrum(data_file: datafile, index: int) -> spectrum:
+    return spectrum(
+        data_file.spectrum_counts[index],
+        data_file.spectrum_eV[index],
+        data_file.spectrum_names[index],
+        data_file.spectrum_comments[index],
+        data_file.spectrum_times[index])
     
-    
+@dataclass 
 class operation:
-    def __init__(self, data_file, index):
-        self.counts = data_file.operation_counts[index]
-        self.eV = data_file.operation_eV[index]
-        self.name = data_file.operation_names[index]
-        self.parent = data_file.operation_parents[index]
-        self.parent_name = data_file.spectrum_names[self.parent]
-        
+    counts: np.ndarray
+    eV: np.ndarray
+    name: str
+    parent: spectrum
+    parent_name: str
+       
     def plot(self, ax = None, **kwargs):
         if type(ax) == type(None):
             plt.plot(self.eV, self.counts, **kwargs)
@@ -673,3 +675,12 @@ class operation:
         else:
             ax.plot(self.eV, self.counts, **kwargs)
             ax.xaxis.set_inverted(True)
+
+def read_operation(data_file: datafile, index: int) -> operation:
+    return operation(
+        data_file.operation_counts[index],
+        data_file.operation_eV[index],
+        data_file.operation_names[index],
+        data_file.operation_parents[index],
+        data_file.spectrum_names[index],
+    )
