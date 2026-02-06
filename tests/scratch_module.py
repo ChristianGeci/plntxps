@@ -19,6 +19,7 @@ def read_datafile(path: str):
                 spectra.append(read_spectrum(entry))
             case EntryType.OPERATION:
                 operations.append(read_operation(entry, spectra[-1]))
+                spectra[-1].child_operations.append(operations[-1])
             case _:
                 pass
     return DataFile(spectra, operations)
@@ -40,7 +41,7 @@ def read_spectrum(entry):
     time = get_time(entry)
     name = get_region(entry)
     comment = get_comment(entry)
-    return Spectrum(counts, eV, name, comment, time)
+    return Spectrum(counts, eV, name, comment, time, [])
 
 def get_data(entry):
     pattern = r"\n\d.*(?:$|\n)"
@@ -102,12 +103,12 @@ def get_comment(entry):
 def get_center(entry):
     pattern = r'# Parameter: "Peak \(x\)".*\n'
     peak_center_line = re.search(pattern, entry).group()
-    unwanted_part = r'# Parameter: "Peak (x)" = '
+    unwanted_part = r'# Parameter: "Peak \(x\)" = '
     center_and_uncertainty = re.sub(unwanted_part, "", peak_center_line)
     splitter = r"eV \+-"
     parsed_center_and_uncertainty = re.split(splitter, center_and_uncertainty)
-    center = parsed_center_and_uncertainty[0].strip()
-    uncertainty = parsed_center_and_uncertainty[1].strip()
+    center = float(parsed_center_and_uncertainty[0])
+    uncertainty = float(parsed_center_and_uncertainty[1])
     result = PeakLocation(center, uncertainty)
     return result
 
@@ -117,7 +118,6 @@ def is_peak_location(entry):
         return False
     return True
 
-
 @dataclass
 class Spectrum:
     counts: np.ndarray
@@ -125,6 +125,7 @@ class Spectrum:
     name: str
     comment: str
     time: float
+    child_operations: list
 
 @dataclass 
 class Operation:
@@ -133,8 +134,8 @@ class Operation:
     name: str
     parent: Spectrum
     parent_name: str
-    #peak_location: PeakLocation
-    
+    peak_location = None # Todo: fix type annotation
+
 @dataclass
 class PeakLocation:
     value: float
@@ -144,3 +145,23 @@ class PeakLocation:
 class DataFile:
     spectra: list[Spectrum]
     operations: list[Operation]
+
+    @property
+    def spectrum_names(self):
+        return [spectrum.name for spectrum in self.spectra]
+
+    def list_spectra(self):
+        ljust_length = 5
+        for name in self.spectrum_names:
+            if len(name.strip()) > ljust_length:
+                ljust_length = len(name)
+        header = f"{"Index":<7}{"Name":<{ljust_length+2}}{"Time (min)"}"
+        print("\x1B[4m" + header + "\x1B[0m")
+        for index, spectrum in enumerate(self.spectra):
+            row = (f"{index:<7}"
+                 + f"{spectrum.name:<{ljust_length+2}}"
+                 + f"{spectrum.time:.2f}")
+            print(row)
+            for operation in spectrum.child_operations:
+                print(f"{" " * 7}{operation.name}")
+            print()
