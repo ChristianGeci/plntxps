@@ -1,6 +1,7 @@
 import numpy as np
 import scipy as sp
 import re
+import matplotlib.pyplot as plt
 from enum import Enum
 from dataclasses import dataclass
 
@@ -23,25 +24,6 @@ def read_datafile(path: str):
             case _:
                 pass
     return DataFile(spectra, operations)
-
-
-def read_operation(entry, _parent):
-    eV, counts = get_data(entry)
-    parent = _parent
-    parent_name = _parent.name
-    name = get_operation_name(entry)
-    result = Operation(counts, eV, name, parent, parent_name)
-    if is_peak_location(entry):
-        peak_location = get_center(entry)
-        result.peak_location = peak_location
-    return result
-
-def read_spectrum(entry):
-    eV, counts = get_data(entry)
-    time = get_time(entry)
-    name = get_region(entry)
-    comment = get_comment(entry)
-    return Spectrum(counts, eV, name, comment, time, [])
 
 def get_data(entry):
     pattern = r"\n\d.*(?:$|\n)"
@@ -127,6 +109,13 @@ class Spectrum:
     time: float
     child_operations: list
 
+def read_spectrum(entry):
+    eV, counts = get_data(entry)
+    time = get_time(entry)
+    name = get_region(entry)
+    comment = get_comment(entry)
+    return Spectrum(counts, eV, name, comment, time, [])
+
 @dataclass 
 class Operation:
     counts: np.ndarray
@@ -136,10 +125,45 @@ class Operation:
     parent_name: str
     peak_location = None # Todo: fix type annotation
 
+def read_operation(entry, _parent):
+    eV, counts = get_data(entry)
+    parent = _parent
+    parent_name = _parent.name
+    name = get_operation_name(entry)
+    result = Operation(counts, eV, name, parent, parent_name)
+    if is_peak_location(entry):
+        peak_location = get_center(entry)
+        result.peak_location = peak_location
+    return result
+
 @dataclass
 class PeakLocation:
     value: float
     uncertainty: float
+
+@dataclass
+class ChargeCurve:
+    times: np.ndarray
+    peak_positions: np.ndarray
+    uncertainties: np.ndarray
+
+    def plot(self, **kwargs):
+        plt.plot(self.times, self.peak_positions, **kwargs)
+    def scatter(self, **kwargs):
+        plt.scatter(self.times, self.peak_positions, **kwargs)
+
+def charge_curve_from_tuples(tuples, start_time):
+    times = []
+    peak_positions = []
+    uncertainties = []
+    for tuple in tuples:
+        times.append(tuple[0])
+        peak_positions.append(tuple[1].value)
+        uncertainties.append(tuple[1].uncertainty)
+    times = np.array(times) - start_time
+    peak_positions = np.array(peak_positions)
+    uncertainties = np.array(uncertainties)
+    return ChargeCurve(times, peak_positions, uncertainties)
 
 @dataclass
 class DataFile:
@@ -165,3 +189,11 @@ class DataFile:
             for operation in spectrum.child_operations:
                 print(f"{" " * 7}{operation.name}")
             print()
+
+    def organize_charging_kinetics(self, region_name):
+        times_locations = [(operation.parent.time, operation.peak_location)
+            for operation in self.operations 
+            if operation.peak_location != None
+                and operation.parent.name == region_name]
+        result = charge_curve_from_tuples(times_locations, self.spectra[0].time)
+        return result 
