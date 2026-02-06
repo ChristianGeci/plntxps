@@ -29,7 +29,11 @@ def read_operation(entry, _parent):
     parent = _parent
     parent_name = _parent.name
     name = get_operation_name(entry)
-    return Operation(counts, eV, name, parent, parent_name)
+    result = Operation(counts, eV, name, parent, parent_name)
+    if is_peak_location(entry):
+        peak_location = get_center(entry)
+        result.peak_location = peak_location
+    return result
 
 def read_spectrum(entry):
     eV, counts = get_data(entry)
@@ -96,7 +100,7 @@ def get_comment(entry):
     return comment.strip()
 
 def get_center(entry):
-    pattern = r'# Parameter: "Peak (x)".*\n'
+    pattern = r'# Parameter: "Peak \(x\)".*\n'
     peak_center_line = re.search(pattern, entry).group()
     unwanted_part = r'# Parameter: "Peak (x)" = '
     center_and_uncertainty = re.sub(unwanted_part, "", peak_center_line)
@@ -104,7 +108,8 @@ def get_center(entry):
     parsed_center_and_uncertainty = re.split(splitter, center_and_uncertainty)
     center = parsed_center_and_uncertainty[0].strip()
     uncertainty = parsed_center_and_uncertainty[1].strip()
-    return center, uncertainty
+    result = PeakLocation(center, uncertainty)
+    return result
 
 def is_peak_location(entry):
     pattern = r'# Operation:\s+Peak Location\n'
@@ -128,6 +133,12 @@ class Operation:
     name: str
     parent: Spectrum
     parent_name: str
+    #peak_location: PeakLocation
+    
+@dataclass
+class PeakLocation:
+    value: float
+    uncertainty: float
 
 @dataclass
 class DataFile:
