@@ -136,6 +136,18 @@ def read_operation(entry, _parent):
         result.peak_location = peak_location
     return result
 
+class charge_reference_spline:
+    def __init__(self, name, times, centers, uncertainties, s):
+        self.times = times
+        self.centers = centers
+        self.uncertainties = uncertainties
+        self.t = np.arange(times[0], times[-1], 0.01)
+        self.tck = sp.interpolate.splrep(times, np.array(centers), s=s)
+        self.spline = sp.interpolate.BSpline(*self.tck)(self.t)
+        self.name = name
+    def interpolate(self, t):    
+        return sp.interpolate.BSpline(*self.tck)(t)
+
 @dataclass
 class PeakLocation:
     value: float
@@ -151,6 +163,19 @@ class ChargeCurve:
         plt.plot(self.times, self.peak_positions, **kwargs)
     def scatter(self, **kwargs):
         plt.scatter(self.times, self.peak_positions, **kwargs)
+    
+    def slice(self, slice_start, slice_end):
+        packed_data = self.times, self.peak_positions, self.uncertainties
+        transposed_data = list(zip(*packed_data))
+        filtered_data = [
+            datum for datum in transposed_data 
+            if datum[0] > slice_start and datum[0] < slice_end]
+        back_transposed_data = list(zip(*filtered_data))
+        times = np.array(back_transposed_data[0])
+        peak_positions = np.array(back_transposed_data[1])
+        uncertainties = np.array(back_transposed_data[2])
+        return ChargeCurve(times, peak_positions, uncertainties)
+        
 
 def charge_curve_from_tuples(tuples, start_time):
     times = []
@@ -164,6 +189,7 @@ def charge_curve_from_tuples(tuples, start_time):
     peak_positions = np.array(peak_positions)
     uncertainties = np.array(uncertainties)
     return ChargeCurve(times, peak_positions, uncertainties)
+
 
 @dataclass
 class DataFile:
@@ -190,10 +216,64 @@ class DataFile:
                 print(f"{" " * 7}{operation.name}")
             print()
 
-    def organize_charging_kinetics(self, region_name):
+    def get_charge_curve(self, region_name) -> ChargeCurve:
         times_locations = [(operation.parent.time, operation.peak_location)
             for operation in self.operations 
             if operation.peak_location != None
                 and operation.parent.name == region_name]
         result = charge_curve_from_tuples(times_locations, self.spectra[0].time)
         return result 
+    
+    def get_charge_referenced_peak_positions(self, time_slice, s = [0.02, 0.02, 0.02], Au_name = 'Au 4f', peaks = ['O 1s', 'Ti 2p']):
+        if len(s) != len(peaks) + 1:
+            raise IndexError('s value needed for each peak type (including gold)')
+        slice_start = time_slice[0]
+        slice_end = time_slice[1]
+        self.splines = []
+
+        Au_charge_curve = self.get_charge_curve(Au_name)
+        sliced_Au_charge_curve = Au_charge_curve.slice(slice_start, slice_end)
+
+        self.splines.append(charge_reference_spline(Au_name, 
+            sliced_Au_charge_curve.times,
+            sliced_Au_charge_curve.peak_positions,
+            sliced_Au_charge_curve.uncertainties,
+            s[0]))
+        
+        # make all other splines
+        for index, name in enumerate(peaks):
+            charge_curve = self.get_charge_curve(name)
+            sliced_charge_curve = charge_curve.slice(slice_start, slice_end)
+            self.splines.append(charge_reference_spline(name, 
+                sliced_charge_curve.times,
+                sliced_charge_curve.peak_positions,
+                sliced_charge_curve.uncertainties, 
+                s[index+1]))
+        
+        # find common time domain for all splines
+        t_common_min = self.splines[0].times[0]
+        for spline in self.splines[1:]:
+            if spline.times[0] > t_common_min:
+                t_common_min = spline.times[0]
+                
+        t_common_max = self.splines[0].times[-1]
+        for spline in self.splines[1:]:
+            if spline.times[-1] < t_common_max:
+                t_common_max = spline.times[-1]
+                
+        t_common = np.arange(t_common_min, t_common_max, 0.01)
+        
+        #reference splines to the Au 4f 7/2
+        charge_correction_curve = 84 - self.splines[0].interpolate(t_common)
+        
+        charge_corrected_splines = []
+        for spline in self.splines[1:]:
+            charge_corrected_splines.append(spline.interpolate(t_common) + charge_correction_curve)
+        
+        #print/store results
+        self.charge_corrected_peak_positions = []
+        for index, spline in enumerate(self.splines[1:]):
+            print(f'{spline.name} peak position: {np.mean(charge_corrected_splines[index]):.4f} +- {np.std(charge_corrected_splines[index]):.4f}')
+            self.charge_corrected_peak_positions.append(np.mean(charge_corrected_splines[index]))
+        
+        return
