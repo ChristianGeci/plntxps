@@ -95,6 +95,24 @@ def get_comment(entry):
     comment = re.sub(unwanted_part, "", comment_line)
     return comment.strip()
 
+def get_center(entry):
+    pattern = r'# Parameter: "Peak (x)".*\n'
+    peak_center_line = re.search(pattern, entry).group()
+    unwanted_part = r'# Parameter: "Peak (x)" = '
+    center_and_uncertainty = re.sub(unwanted_part, "", peak_center_line)
+    splitter = r"eV \+-"
+    parsed_center_and_uncertainty = re.split(splitter, center_and_uncertainty)
+    center = parsed_center_and_uncertainty[0].strip()
+    uncertainty = parsed_center_and_uncertainty[1].strip()
+    return center, uncertainty
+
+def is_peak_location(entry):
+    pattern = r'# Operation:\s+Peak Location\n'
+    if re.search(pattern, entry) is None:
+        return False
+    return True
+
+
 @dataclass
 class Spectrum:
     counts: np.ndarray
