@@ -136,7 +136,7 @@ def read_operation(entry, _parent):
         result.peak_location = peak_location
     return result
 
-class charge_reference_spline:
+class ChargeReferenceSpline:
     def __init__(self, name, times, centers, uncertainties, s):
         self.times = times
         self.centers = centers
@@ -195,6 +195,7 @@ def charge_curve_from_tuples(tuples, start_time):
 class DataFile:
     spectra: list[Spectrum]
     operations: list[Operation]
+    charge_reference = None
 
     @property
     def spectrum_names(self):
@@ -224,17 +225,21 @@ class DataFile:
         result = charge_curve_from_tuples(times_locations, self.spectra[0].time)
         return result 
     
-    def get_charge_referenced_peak_positions(self, time_slice, s = [0.02, 0.02, 0.02], Au_name = 'Au 4f', peaks = ['O 1s', 'Ti 2p']):
+    def get_charge_referenced_peak_positions(self, 
+            time_slice, s = [0.02, 0.02, 0.02], Au_name = 'Au 4f',
+            peaks = ['O 1s', 'Ti 2p']):
         if len(s) != len(peaks) + 1:
-            raise IndexError('s value needed for each peak type (including gold)')
+            raise IndexError(
+                's value needed for each peak type (including gold)')
         slice_start = time_slice[0]
         slice_end = time_slice[1]
-        self.splines = []
+        splines = []
 
         Au_charge_curve = self.get_charge_curve(Au_name)
-        sliced_Au_charge_curve = Au_charge_curve.slice(slice_start, slice_end)
+        sliced_Au_charge_curve = Au_charge_curve.slice(
+            slice_start, slice_end)
 
-        self.splines.append(charge_reference_spline(Au_name, 
+        splines.append(ChargeReferenceSpline(Au_name, 
             sliced_Au_charge_curve.times,
             sliced_Au_charge_curve.peak_positions,
             sliced_Au_charge_curve.uncertainties,
@@ -243,37 +248,43 @@ class DataFile:
         # make all other splines
         for index, name in enumerate(peaks):
             charge_curve = self.get_charge_curve(name)
-            sliced_charge_curve = charge_curve.slice(slice_start, slice_end)
-            self.splines.append(charge_reference_spline(name, 
+            sliced_charge_curve = charge_curve.slice(
+                slice_start, slice_end)
+            splines.append(ChargeReferenceSpline(name, 
                 sliced_charge_curve.times,
                 sliced_charge_curve.peak_positions,
                 sliced_charge_curve.uncertainties, 
                 s[index+1]))
         
         # find common time domain for all splines
-        t_common_min = self.splines[0].times[0]
-        for spline in self.splines[1:]:
-            if spline.times[0] > t_common_min:
-                t_common_min = spline.times[0]
-                
-        t_common_max = self.splines[0].times[-1]
-        for spline in self.splines[1:]:
-            if spline.times[-1] < t_common_max:
-                t_common_max = spline.times[-1]
-                
+        t_common_min = max([spline.times[0] for spline in splines])
+        t_common_max = min([spline.times[-1] for spline in splines])
         t_common = np.arange(t_common_min, t_common_max, 0.01)
         
         #reference splines to the Au 4f 7/2
-        charge_correction_curve = 84 - self.splines[0].interpolate(t_common)
+        charge_correction_curve = 84 - splines[0].interpolate(t_common)
         
         charge_corrected_splines = []
-        for spline in self.splines[1:]:
-            charge_corrected_splines.append(spline.interpolate(t_common) + charge_correction_curve)
+        for spline in splines[1:]:
+            charge_corrected_splines.append(
+                spline.interpolate(t_common) + charge_correction_curve)
         
         #print/store results
-        self.charge_corrected_peak_positions = []
-        for index, spline in enumerate(self.splines[1:]):
+        charge_corrected_peak_positions = []
+        for index, spline in enumerate(splines[1:]):
             print(f'{spline.name} peak position: {np.mean(charge_corrected_splines[index]):.4f} +- {np.std(charge_corrected_splines[index]):.4f}')
-            self.charge_corrected_peak_positions.append(np.mean(charge_corrected_splines[index]))
+            charge_corrected_peak_positions.append(np.mean(charge_corrected_splines[index]))
         
+        self.charge_reference = ChargeReference(
+            dict(zip(splines, [Au_name] + peaks)),
+            dict(zip(peaks, charge_corrected_peak_positions)))
+
         return
+
+@dataclass
+class ChargeReference:
+    """
+    Encapsulates the result of a charge referencing procedure
+    """
+    splines: dict[str, ChargeReferenceSpline]
+    peak_postions: dict[str, float]
