@@ -164,7 +164,6 @@ class ChargeReferenceSpline:
         binding_energies = self.interpolate(t)
         return plt.plot(t, binding_energies, **kwargs)
 
-
 @dataclass
 class PeakLocation:
     value: float
@@ -192,7 +191,6 @@ class ChargeCurve:
         peak_positions = np.array(back_transposed_data[1])
         uncertainties = np.array(back_transposed_data[2])
         return ChargeCurve(times, peak_positions, uncertainties)
-        
 
 def charge_curve_from_tuples(tuples, start_time):
     times = []
@@ -206,7 +204,6 @@ def charge_curve_from_tuples(tuples, start_time):
     peak_positions = np.array(peak_positions)
     uncertainties = np.array(uncertainties)
     return ChargeCurve(times, peak_positions, uncertainties)
-
 
 @dataclass
 class DataFile:
@@ -319,7 +316,7 @@ class DataFile:
     def charge_reference_valence_band_spectra(self, 
             time_slice, reference_spectrum, s = [0.02, 0.02], 
             reference_peaks = ['O 1s', 'Ti 2p'], valence_band_name = "Valence Band", 
-            save_figures = ""):
+            save_figures = "", plot_result = True):
         
         if len(s) != len(reference_peaks):
             raise IndexError('s value needed for each peak type')
@@ -328,23 +325,20 @@ class DataFile:
         
         reference_peak_positions = reference_spectrum.charge_reference.peak_positions
         
-        reference_splines = {}
+        def get_reference_splines():
+            reference_splines = {}
+            # make splines for reference peaks
+            for index, name in enumerate(reference_peaks):
+                # get times, centers
+                charge_curve = self.get_charge_curve(name)
+                sliced_charge_curve = charge_curve.slice(slice_start, slice_end)
+                # make spline
+                reference_splines[name] = (ChargeReferenceSpline(
+                    sliced_charge_curve, s[index]))
+            return reference_splines
+        reference_splines = get_reference_splines()
         
-        # make splines for reference peaks
-        for index, name in enumerate(reference_peaks):
-            # get times, centers
-            charge_curve = self.get_charge_curve(name)
-            sliced_charge_curve = charge_curve.slice(slice_start, slice_end)
-            # make spline
-            reference_splines[name] = (ChargeReferenceSpline(
-                sliced_charge_curve, s[index]))
-            
-        # find a common time domain for the splines
-        t_common_min = max([spline.start_time for spline in reference_splines.values()])
-        t_common_max = min([spline.end_time for spline in reference_splines.values()])
-        t_common = np.arange(t_common_min, t_common_max+0.01, 0.01)
-        
-        # array of each charge correction spline at time t
+        # dictionary of charge correction splines at time t
         def charge_correction_splines(t):
             result = {}
             for name, spline in reference_splines.items():
@@ -354,45 +348,47 @@ class DataFile:
         # average of all charge correction splines at time t
         def mean_charge_correction_spline(t):
             return np.mean(np.array(list(charge_correction_splines(t).values())))
-        
         # collect all valence band spectra in time slice
-        included_valence_band_spectra = [x for x in self.spectra 
-            if x.name == valence_band_name 
-            and (slice_start <= x.time - self.start_time <= slice_end)]
-        total_valence_band_spectrum_count = len([x for x in self.spectra
-            if x.name == valence_band_name])
-        excluded_valence_band_spectra_count = (total_valence_band_spectrum_count
-                                             - len(included_valence_band_spectra))
-        print(f'time slice excludes {excluded_valence_band_spectra_count} '
-            + f'of {total_valence_band_spectrum_count} valence band spectra')
+        def filter_valence_band_spectra():
+            included_valence_band_spectra = [x for x in self.spectra 
+                if x.name == valence_band_name 
+                and (slice_start <= x.time - self.start_time <= slice_end)]
+            total_valence_band_spectrum_count = len([x for x in self.spectra
+                if x.name == valence_band_name])
+            excluded_valence_band_spectra_count = (total_valence_band_spectrum_count
+                                                - len(included_valence_band_spectra))
+            print(f'time slice excludes {excluded_valence_band_spectra_count} '
+                + f'of {total_valence_band_spectrum_count} valence band spectra')
+            return included_valence_band_spectra
+        included_valence_band_spectra = filter_valence_band_spectra()
         
         # get the corresponding charge correction shift to each valence band spectrum
         for spectrum in included_valence_band_spectra:
             spectrum.charge_correction = (
                 mean_charge_correction_spline(spectrum.time-self.start_time))
 
-        window_cutoff = [0, 0]
-        window_cutoff[0] = max([spectrum.charge_correction for spectrum in 
-                                included_valence_band_spectra])
-        window_cutoff[1] = min([spectrum.charge_correction for spectrum in 
-                                included_valence_band_spectra])
-        eV_window = np.arange(
-            included_valence_band_spectra[0].eV[-1] + window_cutoff[0], 
-            included_valence_band_spectra[0].eV[0]+window_cutoff[1], 
-            0.01)[::-1]
+        def get_eV_window():
+            window_cutoff = [0, 0]
+            window_cutoff[0] = max([spectrum.charge_correction for spectrum in 
+                                    included_valence_band_spectra])
+            window_cutoff[1] = min([spectrum.charge_correction for spectrum in 
+                                    included_valence_band_spectra])
+            return np.arange(
+                included_valence_band_spectra[0].eV[-1] + window_cutoff[0], 
+                included_valence_band_spectra[0].eV[0]  + window_cutoff[1], 
+                0.01)[::-1]
+        eV_window = get_eV_window()
         
-        #create a list of all shifted valence band spectra
-        shifted_valence_band_spectra = []
-        for spectrum in included_valence_band_spectra:
-            shifted_valence_band_spectra.append([spectrum.eV_corrected,
-                                                  np.array(spectrum.counts)])
+        # create a list of linear interpolation functions which correspond to the shifted valence band spectra
+        def get_shifted_valence_band_interpolations():
+            shifted_valence_band_interpolations = []
+            for spectrum in included_valence_band_spectra:
+                shifted_valence_band_interpolations.append(
+                    sp.interpolate.interp1d(spectrum.eV_corrected, spectrum.counts))
+            return shifted_valence_band_interpolations
+        shifted_valence_band_interpolations = get_shifted_valence_band_interpolations()
         
-        #created a list of linear interpolation functions which correspond to the shifted valence band spectra
-        shifted_valence_band_interpolations = []
-        for spectrum in shifted_valence_band_spectra:
-            shifted_valence_band_interpolations.append(sp.interpolate.interp1d(spectrum[0], spectrum[1]))
-        
-        #add them all up
+        # add them all up
         shifted_valence_band_sum = []
         for binding_energy in eV_window:
             interpolated_counts = 0
@@ -404,9 +400,30 @@ class DataFile:
             shifted_valence_band_sum.append(interpolated_counts)
         shifted_valence_band_sum = np.array(shifted_valence_band_sum)
         
-        #store the data
-        self.charge_corrected_valence_band_eV = eV_window
-        self.charge_corrected_valence_band_counts = shifted_valence_band_sum
+        # store the data
+        self.charge_corrected_valance_band = Spectrum(
+            eV = eV_window, counts = shifted_valence_band_sum, 
+            time = None, child_operations = None, comment = None,
+            name = "charge corrected valence band")
+        
+        # plotting stuff
+        if (not plot_result):
+            return
+        # plot the individual charge curves
+        for peak_name in reference_peaks:
+            reference_splines[peak_name].charge_curve.plot()
+            reference_splines[peak_name].charge_curve.scatter()
+            reference_splines[peak_name].plot(linestyle = 'dashed')
+            # Todo: add error bars
+            plt.title(peak_name)
+            plt.show()
+        # plot the charge correction curves and their mean
+        #t_common_min = max([spline.start_time for spline in .values()])
+        #t_common_max = min([spline.end_time for spline in splines.values()])
+        #t_common = np.arange(t_common_min, t_common_max, 0.01)
+        for peak_name in reference_peaks:
+            pass
+
         
         #plot the sum of all valence band spectra, with and without shifting
         valence_band_spectrum = np.array(included_valence_band_spectra[0].counts)
