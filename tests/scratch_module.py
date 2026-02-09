@@ -317,7 +317,7 @@ class DataFile:
             save_figures = ""):
         
         if len(s) != len(reference_peaks):
-            raise IndexError('s value needed for each peak type (including gold)')
+            raise IndexError('s value needed for each peak type')
         slice_start = time_slice[0]
         slice_end = time_slice[1]
         
@@ -339,21 +339,19 @@ class DataFile:
         t_common_max = min([spline.end_time for spline in reference_splines.values()])
         t_common = np.arange(t_common_min, t_common_max+0.01, 0.01)
         
-        # define charge correction splines as functions
+        # array of each charge correction spline at time t
         def charge_correction_splines(t):
-            result = []
+            result = {}
             for name, spline in reference_splines.items():
-                result.append(reference_peak_positions[name] - spline.interpolate(t))
-            
-            return np.array(result)
+                result[name] = (reference_peak_positions[name] - spline.interpolate(t))
+            return result
         
+        # average of all charge correction splines at time t
         def mean_charge_correction_spline(t):
-            return np.mean(charge_correction_splines(t))
+            return np.mean(np.array(list(charge_correction_splines(t).values())))
         
         # calculate a charge-correction curve for each spline (just for the sake of plotting it)
         charge_correction_curves = []
-        #for index, spline in enumerate(reference_splines):
-        #    charge_correction_curves.append(reference_peak_positions[index] - spline.interpolate(t_common))
         for t in t_common:
             values = charge_correction_splines(t)
             charge_correction_curves.append(values)
@@ -366,7 +364,9 @@ class DataFile:
         mean_charge_correction_curve = np.array(mean_charge_correction_curve)
         
         #collect all valence band spectra
-        valence_band_spectra = [x for x in self.spectra if x.name == valence_band_name and (time_slice[0] <= x.time - self.start_time <= time_slice[1])]
+        valence_band_spectra = [x for x in self.spectra 
+            if x.name == valence_band_name 
+            and (slice_start <= x.time - self.start_time <= slice_end)]
         print(f'time slice excludes {len([x for x in self.spectra if x.name == valence_band_name])-len(valence_band_spectra)} of {len([x for x in self.spectra if x.name == valence_band_name])} valence band spectra')
         
         # get the corresponding charge correction shift to each valence band spectrum
