@@ -233,7 +233,6 @@ class DataFile:
 
         Au_charge_curve = self.get_charge_curve(Au_name)
         sliced_Au_charge_curve = Au_charge_curve.slice(slice_start, slice_end)
-
         self.splines.append(charge_reference_spline(Au_name, 
             sliced_Au_charge_curve.times,
             sliced_Au_charge_curve.peak_positions,
@@ -251,16 +250,8 @@ class DataFile:
                 s[index+1]))
         
         # find common time domain for all splines
-        t_common_min = self.splines[0].times[0]
-        for spline in self.splines[1:]:
-            if spline.times[0] > t_common_min:
-                t_common_min = spline.times[0]
-                
-        t_common_max = self.splines[0].times[-1]
-        for spline in self.splines[1:]:
-            if spline.times[-1] < t_common_max:
-                t_common_max = spline.times[-1]
-                
+        t_common_min = max([spline.times[0] for spline in self.splines])
+        t_common_max = min([spline.times[-1] for spline in self.splines])           
         t_common = np.arange(t_common_min, t_common_max, 0.01)
         
         #reference splines to the Au 4f 7/2
@@ -268,12 +259,15 @@ class DataFile:
         
         charge_corrected_splines = []
         for spline in self.splines[1:]:
-            charge_corrected_splines.append(spline.interpolate(t_common) + charge_correction_curve)
+            charge_corrected_splines.append(
+                spline.interpolate(t_common) + charge_correction_curve)
         
         #print/store results
         self.charge_corrected_peak_positions = []
         for index, spline in enumerate(self.splines[1:]):
-            print(f'{spline.name} peak position: {np.mean(charge_corrected_splines[index]):.4f} +- {np.std(charge_corrected_splines[index]):.4f}')
-            self.charge_corrected_peak_positions.append(np.mean(charge_corrected_splines[index]))
-        
+            print(f'{spline.name} peak position: '
+                + f'{np.mean(charge_corrected_splines[index]):.4f}'
+                + f' +- {np.std(charge_corrected_splines[index]):.4f}')
+            self.charge_corrected_peak_positions.append(
+                np.mean(charge_corrected_splines[index]))
         return
