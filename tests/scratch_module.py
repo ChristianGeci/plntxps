@@ -108,6 +108,11 @@ class Spectrum:
     comment: str
     time: float
     child_operations: list
+    charge_correction: float = None
+
+    @property
+    def eV_corrected(self):
+        return self.eV + self.charge_correction
 
 def read_spectrum(entry):
     eV, counts = get_data(entry)
@@ -350,7 +355,7 @@ class DataFile:
         def mean_charge_correction_spline(t):
             return np.mean(np.array(list(charge_correction_splines(t).values())))
         
-        #collect all valence band spectra
+        # collect all valence band spectra in time slice
         included_valence_band_spectra = [x for x in self.spectra 
             if x.name == valence_band_name 
             and (slice_start <= x.time - self.start_time <= slice_end)]
@@ -362,21 +367,25 @@ class DataFile:
             + f'of {total_valence_band_spectrum_count} valence band spectra')
         
         # get the corresponding charge correction shift to each valence band spectrum
-        valence_band_charge_corrections = []
         for spectrum in included_valence_band_spectra:
-            valence_band_charge_corrections.append(mean_charge_correction_spline(spectrum.time-self.start_time))
-        valence_band_charge_corrections = np.array(valence_band_charge_corrections)
+            spectrum.charge_correction = (
+                mean_charge_correction_spline(spectrum.time-self.start_time))
 
         window_cutoff = [0, 0]
-        window_cutoff[0] = valence_band_charge_corrections.max()
-        window_cutoff[1] = valence_band_charge_corrections.min()
-        eV_window = np.arange(included_valence_band_spectra[0].eV[-1]+window_cutoff[0], included_valence_band_spectra[0].eV[0]+window_cutoff[1], 0.01)[::-1]
+        window_cutoff[0] = max([spectrum.charge_correction for spectrum in 
+                                included_valence_band_spectra])
+        window_cutoff[1] = min([spectrum.charge_correction for spectrum in 
+                                included_valence_band_spectra])
+        eV_window = np.arange(
+            included_valence_band_spectra[0].eV[-1] + window_cutoff[0], 
+            included_valence_band_spectra[0].eV[0]+window_cutoff[1], 
+            0.01)[::-1]
         
         #create a list of all shifted valence band spectra
         shifted_valence_band_spectra = []
-        for index, spectrum in enumerate(included_valence_band_spectra):
-            shifted_valence_band_spectra.append([spectrum.eV + valence_band_charge_corrections[index], np.array(spectrum.counts)])
-            #print(f'applying shift of {valence_band_charge_corrections[index]}')
+        for spectrum in included_valence_band_spectra:
+            shifted_valence_band_spectra.append([spectrum.eV_corrected,
+                                                  np.array(spectrum.counts)])
         
         #created a list of linear interpolation functions which correspond to the shifted valence band spectra
         shifted_valence_band_interpolations = []
