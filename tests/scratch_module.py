@@ -350,53 +350,38 @@ class DataFile:
         def mean_charge_correction_spline(t):
             return np.mean(np.array(list(charge_correction_splines(t).values())))
         
-        # calculate a charge-correction curve for each spline (just for the sake of plotting it)
-        charge_correction_curves = []
-        for t in t_common:
-            values = charge_correction_splines(t)
-            charge_correction_curves.append(values)
-        charge_correction_curves = np.transpose(np.array(charge_correction_curves))
-        
-        # calculate a mean charge-correction curve (just for the sake of plotting it)
-        mean_charge_correction_curve = []
-        for t in t_common:
-            mean_charge_correction_curve.append(mean_charge_correction_spline(t))
-        mean_charge_correction_curve = np.array(mean_charge_correction_curve)
-        
         #collect all valence band spectra
-        valence_band_spectra = [x for x in self.spectra 
+        included_valence_band_spectra = [x for x in self.spectra 
             if x.name == valence_band_name 
             and (slice_start <= x.time - self.start_time <= slice_end)]
-        print(f'time slice excludes {len([x for x in self.spectra if x.name == valence_band_name])-len(valence_band_spectra)} of {len([x for x in self.spectra if x.name == valence_band_name])} valence band spectra')
+        total_valence_band_spectrum_count = len([x for x in self.spectra
+            if x.name == valence_band_name])
+        excluded_valence_band_spectra_count = (total_valence_band_spectrum_count
+                                             - len(included_valence_band_spectra))
+        print(f'time slice excludes {excluded_valence_band_spectra_count} '
+            + f'of {total_valence_band_spectrum_count} valence band spectra')
         
         # get the corresponding charge correction shift to each valence band spectrum
         valence_band_charge_corrections = []
-        for Spectrum in valence_band_spectra:
-            valence_band_charge_corrections.append(mean_charge_correction_spline(Spectrum.time-self.start_time))
+        for spectrum in included_valence_band_spectra:
+            valence_band_charge_corrections.append(mean_charge_correction_spline(spectrum.time-self.start_time))
         valence_band_charge_corrections = np.array(valence_band_charge_corrections)
-        
-        
-        
-        #define a common set of points that our valence band spectra will use as x-values, trimmed down by 0.5 eV on either side
-        #window_cutoff=np.abs(mean_charge_correction_curve).max()*1.2
-        #eV_window = np.arange(valence_band_spectra[0].eV[-1]+window_cutoff, valence_band_spectra[0].eV[0]+0.01-window_cutoff, 0.01)[::-1]
-        
+
         window_cutoff = [0, 0]
         window_cutoff[0] = valence_band_charge_corrections.max()
         window_cutoff[1] = valence_band_charge_corrections.min()
-        eV_window = np.arange(valence_band_spectra[0].eV[-1]+window_cutoff[0], valence_band_spectra[0].eV[0]+window_cutoff[1], 0.01)[::-1]
+        eV_window = np.arange(included_valence_band_spectra[0].eV[-1]+window_cutoff[0], included_valence_band_spectra[0].eV[0]+window_cutoff[1], 0.01)[::-1]
         
         #create a list of all shifted valence band spectra
         shifted_valence_band_spectra = []
-        for index, Spectrum in enumerate(valence_band_spectra):
-            shifted_valence_band_spectra.append([Spectrum.eV + valence_band_charge_corrections[index], np.array(Spectrum.counts)])
+        for index, spectrum in enumerate(included_valence_band_spectra):
+            shifted_valence_band_spectra.append([spectrum.eV + valence_band_charge_corrections[index], np.array(spectrum.counts)])
             #print(f'applying shift of {valence_band_charge_corrections[index]}')
         
         #created a list of linear interpolation functions which correspond to the shifted valence band spectra
         shifted_valence_band_interpolations = []
-        for Spectrum in shifted_valence_band_spectra:
-            shifted_valence_band_interpolations.append(sp.interpolate.interp1d(Spectrum[0], Spectrum[1]))
-
+        for spectrum in shifted_valence_band_spectra:
+            shifted_valence_band_interpolations.append(sp.interpolate.interp1d(spectrum[0], spectrum[1]))
         
         #add them all up
         shifted_valence_band_sum = []
@@ -415,33 +400,26 @@ class DataFile:
         self.charge_corrected_valence_band_counts = shifted_valence_band_sum
         
         #plot the sum of all valence band spectra, with and without shifting
-        valence_band_spectrum = np.array(valence_band_spectra[0].counts)
-        for Spectrum in valence_band_spectra[1:]:
-            valence_band_spectrum += np.array(Spectrum.counts)
+        valence_band_spectrum = np.array(included_valence_band_spectra[0].counts)
+        for spectrum in included_valence_band_spectra[1:]:
+            valence_band_spectrum += np.array(spectrum.counts)
         
         fig3, ax3 = plt.subplots(1, 2)
         fig3.set_size_inches(16, 5)
-        #fig3.suptitle('USR 450 valence band')
         
         ax3[0].plot(eV_window, shifted_valence_band_sum, label = 'charge-corrected')
-        ax3[0].plot(valence_band_spectra[0].eV, valence_band_spectrum, label = 'no shift applied', linestyle = 'dashed')
+        ax3[0].plot(included_valence_band_spectra[0].eV, valence_band_spectrum, label = 'no shift applied', linestyle = 'dashed')
         ax3[0].legend()
         ax3[0].invert_xaxis()
         ax3[0].set_xlabel("binding energy (eV)")
         ax3[0].set_ylabel("counts")
         
         ax3[1].plot(eV_window, shifted_valence_band_sum, label = 'charge-corrected')
-        ax3[1].plot(valence_band_spectra[0].eV, valence_band_spectrum, label = 'no shift applied', linestyle = 'dashed')
+        ax3[1].plot(included_valence_band_spectra[0].eV, valence_band_spectrum, label = 'no shift applied', linestyle = 'dashed')
         ax3[1].legend()
         ax3[1].set_xlim(2, 6)
         ax3[1].invert_xaxis()
         ax3[1].set_xlabel("binding energy (eV)")
-        
-        if len(save_figures) > 0:
-            fig.savefig(f'{save_figures} splines.svg')
-            fig2.savefig(f'{save_figures} charge correction curves.svg')
-            fig3.savefig(f'{save_figures} valence band.svg')
-        
         
         return
 
