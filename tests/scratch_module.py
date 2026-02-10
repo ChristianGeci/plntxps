@@ -505,33 +505,129 @@ class DataFile:
         self.charge_corrected_valence_band.plot(color = "tab:blue")
 
         with autoscale_turned_off(ax):
-            ax.plot(self.charge_corrected_valence_band_eV,
+            ax.plot(self.charge_corrected_valence_band.eV,
                     fit_background.x[0]
-                  + self.charge_corrected_valence_band_eV * fit_background.x[1],
+                  + self.charge_corrected_valence_band.eV * fit_background.x[1],
                      color = 'tab:green', linestyle = 'dashed')
-            ax.plot(self.charge_corrected_valence_band_eV,
+            ax.plot(self.charge_corrected_valence_band.eV,
                     fit_edge.x[0]
-                  + self.charge_corrected_valence_band_eV * fit_edge.x[1],
+                  + self.charge_corrected_valence_band.eV * fit_edge.x[1],
                     color = 'tab:green', linestyle = 'dashed')
         
         
         ax.set_xlabel('Binding Energy (eV)')
         ax.set_ylabel('Counts')
-        VBM_with_broadening = (fit_edge.x[0]-fit_background.x[0])/(fit_background.x[1]-fit_edge.x[1])
-        VBM = VBM_with_broadening + instrumental_broadening/2
+        VBM_with_broadening = ((fit_edge.x[0]-fit_background.x[0])
+                              /(fit_background.x[1]-fit_edge.x[1]))
+        VBM = VBM_with_broadening + instrumental_broadening / 2
         
         
-        ax.scatter(self.charge_corrected_valence_band_eV[background_min], fit_background.x[0]+self.charge_corrected_valence_band_eV[background_min]*fit_background.x[1], color = 'tab:green', zorder = 3)
-        ax.scatter(self.charge_corrected_valence_band_eV[background_max], fit_background.x[0]+self.charge_corrected_valence_band_eV[background_max]*fit_background.x[1], color = 'tab:green', zorder = 3)
+        ax.scatter(
+            self.charge_corrected_valence_band.eV[background_min],
+            fit_background.x[0]
+          + self.charge_corrected_valence_band.eV[background_min] 
+          * fit_background.x[1],
+            color = 'tab:green', zorder = 3)
+        ax.scatter(
+            self.charge_corrected_valence_band.eV[background_max],
+            fit_background.x[0]
+          + self.charge_corrected_valence_band.eV[background_max]
+          * fit_background.x[1],
+            color = 'tab:green', zorder = 3)
         
-        ax.scatter(self.charge_corrected_valence_band_eV[edge_min], fit_edge.x[0]+self.charge_corrected_valence_band_eV[edge_min]*fit_edge.x[1], color = 'tab:green', zorder = 3)
-        ax.scatter(self.charge_corrected_valence_band_eV[edge_max], fit_edge.x[0]+self.charge_corrected_valence_band_eV[edge_max]*fit_edge.x[1], color = 'tab:green', zorder = 3)
+        ax.scatter(
+            self.charge_corrected_valence_band.eV[edge_min],
+            fit_edge.x[0]
+          + self.charge_corrected_valence_band.eV[edge_min]
+          * fit_edge.x[1],
+            color = 'tab:green', zorder = 3)
+        ax.scatter(
+            self.charge_corrected_valence_band.eV[edge_max],
+            fit_edge.x[0]
+          + self.charge_corrected_valence_band.eV[edge_max]
+          * fit_edge.x[1],
+            color = 'tab:green', zorder = 3)
         
-        ax.scatter(VBM_with_broadening, fit_background.x[0]+VBM_with_broadening*fit_background.x[1], color = 'tab:red', zorder = 3)
+        ax.scatter(
+            VBM_with_broadening,
+            fit_background.x[0] + VBM_with_broadening * fit_background.x[1],
+            color = 'tab:red', zorder = 3)
         
-        ax.vlines(VBM, fit_edge.x[0]+self.charge_corrected_valence_band_eV[edge_min]*fit_edge.x[1], fit_background.x[0]+self.charge_corrected_valence_band_eV[background_max]*fit_background.x[1], color = 'tab:red', linestyle = 'dashed')
+        ax.vlines(
+            VBM,
+            fit_edge.x[0]+self.charge_corrected_valence_band.eV[edge_min]*fit_edge.x[1],
+            fit_background.x[0]+self.charge_corrected_valence_band.eV[background_max]*fit_background.x[1],
+            color = 'tab:red', linestyle = 'dashed')
         
         print(f'Valence Band Maximum: {VBM} eV') 
+    
+    def find_fermi_edge(self, smoothing_factor, guess):
+        
+        #spline fit:
+        x = self.charge_corrected_valence_band.eV[::-1]
+        y = self.charge_corrected_valence_band.counts[::-1]
+
+        tck = sp.interpolate.splrep(x, y, s=smoothing_factor)
+        y_spline = sp.interpolate.BSpline(*tck)(x)
+        
+        fig, axs = plt.subplots(1, 2)
+        fig.set_size_inches(15, 5.5)
+
+
+        axs[0].plot(x, y, color = 'tab:blue')
+        axs[0].plot(x, y_spline, color = 'tab:orange') 
+        axs[0].vlines(guess, y.min(), y.max(), color = 'red', linestyle = 'dashed')
+        axs[0].invert_xaxis()
+
+        axs[1].plot(x, y, color = 'tab:blue')
+        axs[1].plot(x, y_spline, color = 'tab:orange')
+        axs[1].vlines(guess, y.min(), y.max(), color = 'red', linestyle = 'dashed')
+        axs[1].set_xlim(guess-2, guess+2)
+        axs[1].invert_xaxis()
+        fig.suptitle('spline fit to charge-corrected data')
+        
+        #first derivative:
+        
+        fig2, axs2 = plt.subplots(1, 2)
+        
+        yp = np.diff(y_spline)/np.diff(x)
+        xp = (x[:-1] + x[1:]) / 2 
+        fig2.set_size_inches(15, 5.5)
+
+        axs2[0].plot(xp, yp, color = 'tab:blue')
+        axs2[0].vlines(guess, yp.min(), yp.max(), color = 'red', linestyle = 'dashed')
+        axs2[0].invert_xaxis()
+        axs2[1].plot(xp, yp, color = 'tab:blue')
+        axs2[1].vlines(guess, yp.min(), yp.max(), color = 'red', linestyle = 'dashed')
+        axs2[1].set_xlim(guess-2, guess+2)
+        axs2[1].invert_xaxis()
+
+
+
+        fig2.suptitle('first derivative')
+
+
+
+        #second derivative:
+
+        ypp = np.diff(yp)/np.diff(xp)
+        xpp = (xp[:-1] + xp[1:]) / 2 
+
+        fig3, axs3 = plt.subplots(1, 2)
+        fig3.set_size_inches(15, 5.5)
+
+        axs3[0].plot(xpp, ypp, color = 'tab:blue')
+        axs3[0].hlines(0, xpp.min(), xpp.max(), color = 'red', linestyle = 'dashed')
+        axs3[0].vlines(guess, ypp.min(), ypp.max(), color = 'red', linestyle = 'dashed')
+        axs3[0].invert_xaxis()
+        axs3[1].plot(xpp, ypp, color = 'tab:blue')
+        axs3[1].hlines(0, xpp.min(), xpp.max(), color = 'red', linestyle = 'dashed')
+        axs3[1].vlines(guess, ypp.min(), ypp.max(), color = 'red', linestyle = 'dashed')
+        axs3[1].set_xlim(guess-2, guess+2)
+        axs3[1].set_ylim(ypp.min()/2, ypp.max()/2)
+        axs3[1].invert_xaxis()
+
+        fig3.suptitle('second derivative')
 
 @dataclass
 class ChargeReference:
