@@ -8,34 +8,14 @@ import scipy as sp
 import re
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+
 from .spectrum import read_spectrum, Spectrum
 from .operation import read_operation, Operation
 from .readutils import EntryType, get_entry_type
 from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_reference_spline import ChargeReferenceSpline
 from .plot_utils import autoscale_turned_off
-
-
-def read_datafile(path: str):
-    with open(path, 'r') as f:
-        text = f.read()
-    new_entry_pattern = r"\n\n"
-    entries = re.split(new_entry_pattern, text)
-    
-    spectra = []
-    operations = []
-    for entry in entries:
-        entry_type = get_entry_type(entry)
-        match entry_type:
-            case EntryType.SPECTRUM:
-                spectra.append(read_spectrum(entry))
-            case EntryType.OPERATION:
-                operations.append(read_operation(entry, spectra[-1]))
-                spectra[-1].child_operations.append(operations[-1])
-            case _:
-                pass
-    return DataFile(spectra, operations)
-datafile = read_datafile
+from .charge_reference import ChargeReference
 
 @dataclass
 class DataFile:
@@ -397,22 +377,23 @@ class DataFile:
         axs3[1].set_ylim(ypp.min()/2, ypp.max()/2)
         fig3.suptitle('second derivative')
 
-@dataclass
-class ChargeReference:
-    """
-    Encapsulates the result of a charge referencing procedure
-    """
-    charge_curve_data: dict[str, ChargeCurve]
-    charge_curve_splines: dict[str, ChargeReferenceSpline]
-    peak_positions: dict[str, float]
-    charge_correction_curve: ChargeCurve
-
-    def plot(self):
-        for peak_name in self.charge_curve_data.keys():
-            self.charge_curve_data[peak_name].plot()
-            self.charge_curve_data[peak_name].scatter()
-            self.charge_curve_splines[peak_name].plot(linestyle = 'dashed')
-            plt.xlabel("Time (min)")
-            plt.ylabel("Binding Energy (eV)")
-            plt.title(peak_name)
-            plt.show()
+def read_datafile(path: str) -> DataFile:
+    with open(path, 'r') as f:
+        text = f.read()
+    new_entry_pattern = r"\n\n"
+    entries = re.split(new_entry_pattern, text)
+    
+    spectra = []
+    operations = []
+    for entry in entries:
+        entry_type = get_entry_type(entry)
+        match entry_type:
+            case EntryType.SPECTRUM:
+                spectra.append(read_spectrum(entry))
+            case EntryType.OPERATION:
+                operations.append(read_operation(entry, spectra[-1]))
+                spectra[-1].child_operations.append(operations[-1])
+            case _:
+                pass
+    return DataFile(spectra, operations)
+datafile = read_datafile
