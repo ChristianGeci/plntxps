@@ -546,71 +546,48 @@ class DataFile:
         return
     
     def find_fermi_edge(self, smoothing_factor, guess):
-        
-        #spline fit:
+        # spline fit
         x = self.charge_corrected_valence_band.eV[::-1]
         y = self.charge_corrected_valence_band.counts[::-1]
-
         tck = sp.interpolate.splrep(x, y, s=smoothing_factor)
         y_spline = sp.interpolate.BSpline(*tck)(x)
-        
         fig, axs = plt.subplots(1, 2)
         fig.set_size_inches(15, 5.5)
-
-
-        axs[0].plot(x, y, color = 'tab:blue')
-        axs[0].plot(x, y_spline, color = 'tab:orange') 
-        axs[0].vlines(guess, y.min(), y.max(), color = 'red', linestyle = 'dashed')
-        axs[0].invert_xaxis()
-
-        axs[1].plot(x, y, color = 'tab:blue')
-        axs[1].plot(x, y_spline, color = 'tab:orange')
-        axs[1].vlines(guess, y.min(), y.max(), color = 'red', linestyle = 'dashed')
-        axs[1].set_xlim(guess-2, guess+2)
-        axs[1].invert_xaxis()
+        # plot data/spline to two panes, zoom in to the second pane
+        for ax in axs.flatten():
+            ax.plot(x, y, color = 'tab:blue')
+            ax.plot(x, y_spline, color = 'tab:orange') 
+            ax.vlines(guess, y.min(), y.max(), color = 'red', linestyle = 'dashed')
+            ax.invert_xaxis()
+        axs[1].set_xlim(guess+2, guess-2)
         fig.suptitle('spline fit to charge-corrected data')
         
-        #first derivative:
-        
-        fig2, axs2 = plt.subplots(1, 2)
-        
+        # first derivative
         yp = np.diff(y_spline)/np.diff(x)
         xp = (x[:-1] + x[1:]) / 2 
+        # plot first derivative
+        fig2, axs2 = plt.subplots(1, 2)
         fig2.set_size_inches(15, 5.5)
-
-        axs2[0].plot(xp, yp, color = 'tab:blue')
-        axs2[0].vlines(guess, yp.min(), yp.max(), color = 'red', linestyle = 'dashed')
-        axs2[0].invert_xaxis()
-        axs2[1].plot(xp, yp, color = 'tab:blue')
-        axs2[1].vlines(guess, yp.min(), yp.max(), color = 'red', linestyle = 'dashed')
-        axs2[1].set_xlim(guess-2, guess+2)
-        axs2[1].invert_xaxis()
-
-
-
+        for ax in axs2.flatten():
+            ax.plot(xp, yp, color = 'tab:blue')
+            ax.vlines(guess, yp.min(), yp.max(), color = 'red', linestyle = 'dashed')
+            ax.invert_xaxis()
+        axs2[1].set_xlim(guess+2, guess-2)
         fig2.suptitle('first derivative')
 
-
-
-        #second derivative:
-
+        # second derivative:
         ypp = np.diff(yp)/np.diff(xp)
         xpp = (xp[:-1] + xp[1:]) / 2 
-
+        # plot second derivative
         fig3, axs3 = plt.subplots(1, 2)
         fig3.set_size_inches(15, 5.5)
-
-        axs3[0].plot(xpp, ypp, color = 'tab:blue')
-        axs3[0].hlines(0, xpp.min(), xpp.max(), color = 'red', linestyle = 'dashed')
-        axs3[0].vlines(guess, ypp.min(), ypp.max(), color = 'red', linestyle = 'dashed')
-        axs3[0].invert_xaxis()
-        axs3[1].plot(xpp, ypp, color = 'tab:blue')
-        axs3[1].hlines(0, xpp.min(), xpp.max(), color = 'red', linestyle = 'dashed')
-        axs3[1].vlines(guess, ypp.min(), ypp.max(), color = 'red', linestyle = 'dashed')
-        axs3[1].set_xlim(guess-2, guess+2)
+        for ax in axs3.flatten():
+            ax.plot(xpp, ypp, color = 'tab:blue')
+            ax.hlines(0, xpp.min(), xpp.max(), color = 'red', linestyle = 'dashed')
+            ax.vlines(guess, ypp.min(), ypp.max(), color = 'red', linestyle = 'dashed')
+            ax.invert_xaxis()
+        axs3[1].set_xlim(guess+2, guess-2)
         axs3[1].set_ylim(ypp.min()/2, ypp.max()/2)
-        axs3[1].invert_xaxis()
-
         fig3.suptitle('second derivative')
 
 @dataclass
