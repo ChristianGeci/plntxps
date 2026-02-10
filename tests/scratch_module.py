@@ -344,10 +344,10 @@ class DataFile:
             for name, spline in reference_splines.items():
                 result[name] = (reference_peak_positions[name] - spline.interpolate(t))
             return result
-        
         # average of all charge correction splines at time t
         def mean_charge_correction_spline(t):
             return np.mean(np.array(list(charge_correction_splines(t).values())))
+
         # collect all valence band spectra in time slice
         def filter_valence_band_spectra():
             included_valence_band_spectra = [x for x in self.spectra 
@@ -418,11 +418,24 @@ class DataFile:
             plt.title(peak_name)
             plt.show()
         # plot the charge correction curves and their mean
-        #t_common_min = max([spline.start_time for spline in .values()])
-        #t_common_max = min([spline.end_time for spline in splines.values()])
-        #t_common = np.arange(t_common_min, t_common_max, 0.01)
-        for peak_name in reference_peaks:
-            pass
+        def plot_charge_correction_splines():
+            t_common_min = max([spline.start_time for spline in reference_splines.values()])
+            t_common_max = min([spline.end_time for spline in reference_splines.values()])
+            t_common = np.arange(t_common_min, t_common_max, 0.01)
+            splines = charge_correction_splines(t_common)
+            mean_accumulator = np.zeros(len(list(splines.values())[0]))
+            for peak_name in reference_peaks:
+                plt.plot(t_common, splines[peak_name], label = peak_name)
+                mean_accumulator += splines[peak_name]
+            mean = mean_accumulator / len(splines.values())
+            plt.plot(t_common, mean, label = "Mean")
+            plt.plot()
+            plt.xlabel("Time (min)")
+            plt.ylabel("Δ Binding Energy (eV)")
+            plt.title("Charge correction curves")
+            plt.legend()
+            plt.show()
+        plot_charge_correction_splines()
 
         
         #plot the sum of all valence band spectra, with and without shifting
