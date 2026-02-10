@@ -1,7 +1,7 @@
-print("data processed with plnt_xps version 0.1.0")
+print("data processed with plnt_xps version 0.1.1")
 print("our crew is replaceable, your package isn't!")
 
-#Processing Laborsaving iNterpolative Tools for XPS
+# Processing Laborsaving iNterpolative Tools for XPS
 
 import numpy as np
 import scipy as sp
@@ -38,6 +38,7 @@ def read_datafile(path: str):
             case _:
                 pass
     return DataFile(spectra, operations)
+datafile = read_datafile
 
 def get_data(entry):
     pattern = r"\n\d.*(?:$|\n)"

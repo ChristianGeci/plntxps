@@ -14,7 +14,6 @@ def autoscale_turned_off(ax=None):
   ax.set_xlim(*lims[0])
   ax.set_ylim(*lims[1])
 
-
 def read_datafile(path: str):
     with open(path, 'r') as f:
         text = f.read()
@@ -460,7 +459,6 @@ class DataFile:
             plt.legend()
             plt.show()
         plot_charge_correction_splines()
-
         
         #plot the sum of all valence band spectra, with and without shifting
         valence_band_spectrum = np.array(included_valence_band_spectra[0].counts)
@@ -575,7 +573,7 @@ class DataFile:
         axs2[1].set_xlim(guess+2, guess-2)
         fig2.suptitle('first derivative')
 
-        # second derivative:
+        # second derivative
         ypp = np.diff(yp)/np.diff(xp)
         xpp = (xp[:-1] + xp[1:]) / 2 
         # plot second derivative
