@@ -125,6 +125,18 @@ class Spectrum:
     @property
     def eV_corrected(self):
         return self.eV + self.charge_correction
+    
+    def slice(self, slice_min, slice_max):
+        packed_data = self.eV, self.counts
+        transposed_data = list(zip(*packed_data))
+        filtered_data = [
+            datum for datum in transposed_data 
+            if datum[0] > slice_min and datum[0] < slice_max]
+        back_transposed_data = list(zip(*filtered_data))
+        eV = np.array(back_transposed_data[0])
+        counts = np.array(back_transposed_data[1])
+        return Spectrum(counts=counts, eV=eV, name=None, comment=None,
+                        time=None, child_operations=None, charge_correction=None)
 
 def read_spectrum(entry):
     eV, counts = get_data(entry)
@@ -475,91 +487,63 @@ class DataFile:
         return
     def find_fermi_edge_linfit(
             self, background_range, edge_range, instrumental_broadening = 0.8):
-
-        background_min = np.amax(np.where(
-            self.charge_corrected_valence_band.eV > background_range[1]))
-        background_max = np.amax(np.where(
-            self.charge_corrected_valence_band.eV > background_range[0]))
-
-        edge_min = np.amax(np.where(
-            self.charge_corrected_valence_band.eV > edge_range[1]))
-        edge_max = np.amax(np.where(
-            self.charge_corrected_valence_band.eV > edge_range[0]))
-
-        y_background = self.charge_corrected_valence_band.counts[
-            background_min:background_max]
-        x_background = self.charge_corrected_valence_band.eV[
-            background_min:background_max]
-        X_background = np.array([[1]*len(y_background), x_background]).T
-        fit_background = sp.optimize.lsq_linear(X_background, y_background)
-
-        y_edge = self.charge_corrected_valence_band.counts[edge_min:edge_max]
-        x_edge = self.charge_corrected_valence_band.eV[edge_min:edge_max]
-        X_edge = np.array([[1]*len(y_edge), x_edge]).T
-        fit_edge = sp.optimize.lsq_linear(X_edge, y_edge)
-
+        # slice background and edge regions
+        edge_data = self.charge_corrected_valence_band.slice(
+            edge_range[0], edge_range[1])
+        background_data = self.charge_corrected_valence_band.slice(
+            background_range[0], background_range[1])
+        # fit background region
+        X_background = np.array([[1]*len(background_data.counts), background_data.eV]).T
+        fit_background = sp.optimize.lsq_linear(X_background, background_data.counts)
+        # fit edge region
+        X_edge = np.array([[1]*len(edge_data.counts), edge_data.eV]).T # I have no goddamn idea what this does
+        fit_edge = sp.optimize.lsq_linear(X_edge, edge_data.counts)
+        # find valence band maximum
+        VBM = ((fit_edge.x[0]-fit_background.x[0])
+              /(fit_background.x[1]-fit_edge.x[1]))
+        VBM_with_broadening = VBM - instrumental_broadening / 2
+        # plot result
         fig, ax = plt.subplots()
-
-       # ax.plot(self.charge_corrected_valence_band_eV,
-       #         self.charge_corrected_valence_band_counts, color = 'tab:blue')
         self.charge_corrected_valence_band.plot(color = "tab:blue")
-
         with autoscale_turned_off(ax):
+            # background linear fit
             ax.plot(self.charge_corrected_valence_band.eV,
                     fit_background.x[0]
                   + self.charge_corrected_valence_band.eV * fit_background.x[1],
                      color = 'tab:green', linestyle = 'dashed')
+            # edge linear fit
             ax.plot(self.charge_corrected_valence_band.eV,
                     fit_edge.x[0]
                   + self.charge_corrected_valence_band.eV * fit_edge.x[1],
                     color = 'tab:green', linestyle = 'dashed')
-        
-        
-        ax.set_xlabel('Binding Energy (eV)')
-        ax.set_ylabel('Counts')
-        VBM_with_broadening = ((fit_edge.x[0]-fit_background.x[0])
-                              /(fit_background.x[1]-fit_edge.x[1]))
-        VBM = VBM_with_broadening + instrumental_broadening / 2
-        
-        
-        ax.scatter(
-            self.charge_corrected_valence_band.eV[background_min],
-            fit_background.x[0]
-          + self.charge_corrected_valence_band.eV[background_min] 
-          * fit_background.x[1],
+        # background chosen points
+        ax.scatter(min(background_data.eV),
+            fit_background.x[0] + min(background_data.eV) * fit_background.x[1],
             color = 'tab:green', zorder = 3)
-        ax.scatter(
-            self.charge_corrected_valence_band.eV[background_max],
-            fit_background.x[0]
-          + self.charge_corrected_valence_band.eV[background_max]
-          * fit_background.x[1],
+        ax.scatter(max(background_data.eV),
+            fit_background.x[0] + max(background_data.eV) * fit_background.x[1],
             color = 'tab:green', zorder = 3)
-        
-        ax.scatter(
-            self.charge_corrected_valence_band.eV[edge_min],
-            fit_edge.x[0]
-          + self.charge_corrected_valence_band.eV[edge_min]
-          * fit_edge.x[1],
+        # edge chosen points
+        ax.scatter(min(edge_data.eV),
+            fit_edge.x[0] + min(edge_data.eV) * fit_edge.x[1],
             color = 'tab:green', zorder = 3)
-        ax.scatter(
-            self.charge_corrected_valence_band.eV[edge_max],
-            fit_edge.x[0]
-          + self.charge_corrected_valence_band.eV[edge_max]
-          * fit_edge.x[1],
+        ax.scatter(max(edge_data.eV),
+            fit_edge.x[0] + max(edge_data.eV) * fit_edge.x[1],
             color = 'tab:green', zorder = 3)
-        
+        # valence band maximum
         ax.scatter(
             VBM_with_broadening,
             fit_background.x[0] + VBM_with_broadening * fit_background.x[1],
-            color = 'tab:red', zorder = 3)
-        
+            color = 'tab:red', zorder = 3)  
         ax.vlines(
             VBM,
-            fit_edge.x[0]+self.charge_corrected_valence_band.eV[edge_min]*fit_edge.x[1],
-            fit_background.x[0]+self.charge_corrected_valence_band.eV[background_max]*fit_background.x[1],
+            fit_edge.x[0]+min(edge_data.eV)*fit_edge.x[1],
+            fit_background.x[0]+background_data.eV[0]*fit_background.x[1],
             color = 'tab:red', linestyle = 'dashed')
-        
-        print(f'Valence Band Maximum: {VBM} eV') 
+        ax.set_xlabel('Binding Energy (eV)')
+        ax.set_ylabel('Counts')
+        print(f'Valence Band Maximum: {VBM} eV')
+        return
     
     def find_fermi_edge(self, smoothing_factor, guess):
         
