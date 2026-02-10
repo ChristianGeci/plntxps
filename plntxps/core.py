@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 
 from .spectrum import read_spectrum, Spectrum, read_operation, Operation
-from .readutils import EntryType, get_entry_type
+from .read_utils import EntryType, get_entry_type
 from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
