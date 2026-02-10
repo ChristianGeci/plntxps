@@ -3,7 +3,9 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-from .readutils import get_data, get_time, get_region, get_comment
+from .readutils import (get_data, get_time, is_peak_location,
+    get_region, get_comment, get_operation_name, get_center)
+from .peak_location import PeakLocation
 
 @dataclass
 class Spectrum:
@@ -17,7 +19,7 @@ class Spectrum:
     comment: str
     time: float
     "Timestamp of spectrum acquisition"
-    child_operations: list
+    child_operations: list[Operation]
     "Operations (e.g. peak area, multi-peak fit) which reference this spectrum"
     charge_correction: float = None
     "Shift applied to binding energy to account for charging effects"
@@ -65,3 +67,22 @@ def read_spectrum(entry: str) -> Spectrum:
     name = get_region(entry)
     comment = get_comment(entry)
     return Spectrum(counts, eV, name, comment, time, [])
+
+@dataclass 
+class Operation:
+    "Contains an operation for an XPS spectrum (e.g. peak location, peak area, etc.)"
+    counts: np.ndarray
+    eV: np.ndarray
+    name: str
+    parent: Spectrum
+    parent_name: str
+    peak_location: PeakLocation = None 
+
+def read_operation(entry, parent: Spectrum) -> Operation:
+    eV, counts = get_data(entry)
+    name = get_operation_name(entry)
+    result = Operation(counts, eV, name, parent, parent.name)
+    if is_peak_location(entry):
+        peak_location = get_center(entry)
+        result.peak_location = peak_location
+    return result

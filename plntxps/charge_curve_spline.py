@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 
 from .charge_curve import ChargeCurve
 
-class ChargeReferenceSpline: # Todo: Rename to charge curve spline?
+class ChargeCurveSpline:
     """
-    Create a spline around the wrapped charge curve
+    Wraps a charge curve and creates a callable spline function
+    based on the contained charge curve
     """
     def __init__(self, charge_curve: ChargeCurve, s: list[float]):
         self.charge_curve = charge_curve

@@ -9,11 +9,10 @@ import re
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 
-from .spectrum import read_spectrum, Spectrum
-from .operation import read_operation, Operation
+from .spectrum import read_spectrum, Spectrum, read_operation, Operation
 from .readutils import EntryType, get_entry_type
 from .charge_curve import ChargeCurve, charge_curve_from_tuples
-from .charge_reference_spline import ChargeReferenceSpline
+from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
 
@@ -73,7 +72,7 @@ class DataFile:
         reference_charge_curve = self.get_charge_curve(reference_name)
         charge_curve_slices[reference_name] = reference_charge_curve.slice(
             slice_start, slice_end)
-        splines[reference_name] = (ChargeReferenceSpline( 
+        splines[reference_name] = (ChargeCurveSpline( 
             charge_curve_slices[reference_name],
             s[0]))
         
@@ -82,7 +81,7 @@ class DataFile:
             charge_curve = self.get_charge_curve(name)
             charge_curve_slices[name] = charge_curve.slice(
                 slice_start, slice_end)
-            splines[name] = (ChargeReferenceSpline(
+            splines[name] = (ChargeCurveSpline(
                 charge_curve_slices[name],
                 s[index+1]))
         
@@ -145,7 +144,7 @@ class DataFile:
                 charge_curve = self.get_charge_curve(name)
                 sliced_charge_curve = charge_curve.slice(slice_start, slice_end)
                 # make spline
-                reference_splines[name] = (ChargeReferenceSpline(
+                reference_splines[name] = (ChargeCurveSpline(
                     sliced_charge_curve, s[index]))
             return reference_splines
         reference_splines = get_reference_splines()
