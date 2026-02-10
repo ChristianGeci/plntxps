@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
 import re
-from .readutils import (get_data, get_time, is_peak_location,
+from .read_utils import (get_data, get_time, is_peak_location,
     get_region, get_comment, get_operation_name, get_center)
 from .peak_location import PeakLocation
 
