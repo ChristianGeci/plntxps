@@ -9,7 +9,7 @@ class EntryType(Enum):
     OPERATION = 1
 
 def get_data(entry):
-    pattern = r"\n\d.*(?:$|\n)"
+    pattern = r"\n-*\d.*(?:$|\n)"
     data_lines = re.findall(pattern, entry)
     eV = []
     counts = []
