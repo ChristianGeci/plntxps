@@ -121,7 +121,13 @@ class DataFile:
             charge_corrected_peak_positions,
             charge_correction_curve)
         if plot_result:
-            self.charge_reference.plot()
+            for peak_name in self.charge_reference.charge_curve_data.keys():
+                self.charge_reference.plot(peak_name)
+                plt.xlabel("Time (minutes)")
+                plt.ylabel("Binding Energy (eV)")
+                plt.title(peak_name)
+                plt.grid(color = 'gainsboro', linestyle = 'dashed')
+                plt.show()
         return
     
     def charge_reference_valence_band_spectra(self, 

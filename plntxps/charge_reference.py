@@ -13,13 +13,7 @@ class ChargeReference:
     charge_curve_splines: dict[str, ChargeCurveSpline]
     peak_positions: dict[str, float]
     charge_correction_curve: ChargeCurve
-
-    def plot(self):
-        for peak_name in self.charge_curve_data.keys():
-            self.charge_curve_data[peak_name].plot()
-            self.charge_curve_data[peak_name].scatter()
-            self.charge_curve_splines[peak_name].plot(linestyle = 'dashed')
-            plt.xlabel("Time (min)")
-            plt.ylabel("Binding Energy (eV)")
-            plt.title(peak_name)
-            plt.show()
+    
+    def plot(self, peak_name, **kwargs):
+        line, = self.charge_curve_splines[peak_name].plot(linestyle = 'dashed', **kwargs)
+        self.charge_curve_data[peak_name].plot(linewidth = 0, marker = 'o', color = line.get_color())
