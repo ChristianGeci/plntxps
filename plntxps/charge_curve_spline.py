@@ -30,3 +30,12 @@ class ChargeCurveSpline:
         t = np.arange(self.start_time, self.end_time, 0.01)
         binding_energies = self.interpolate(t)
         return plt.plot(t, binding_energies, **kwargs)
+
+def subtract_splines(minuend_spline, subtrahend_spline):
+    t_min = max(minuend_spline.t[0], subtrahend_spline.t[0])
+    t_max = min(minuend_spline.t[-1], subtrahend_spline.t[-1])
+    t = np.arange(t_min, t_max, 0.01)
+    minuend = minuend_spline.interpolate(t)
+    subtrahend = subtrahend_spline.interpolate(t)
+    difference = minuend - subtrahend
+    return t, difference
