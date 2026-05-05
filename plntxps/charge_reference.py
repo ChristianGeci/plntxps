@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import matplotlib.pyplot as plt
 
 from .charge_curve import ChargeCurve
 from .charge_curve_spline import ChargeCurveSpline
