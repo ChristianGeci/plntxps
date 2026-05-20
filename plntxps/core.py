@@ -55,36 +55,32 @@ class DataFile:
         result = charge_curve_from_tuples(
             times_locations, self.spectra[0].time)
         return result 
-    
-    def get_charge_referenced_peak_positions(self, 
-            time_slice, s = [0.02, 0.02, 0.02], 
-            reference_name = 'Au 4f', reference_energy = 84,
-            peak_names = ['O 1s', 'Ti 2p'],
-            plot_result = False):
-        if len(s) != len(peak_names) + 1:
-            raise IndexError(
-                's value needed for each peak type (including gold)')
+
+    def get_charge_curve_splines(self, time_slice, s, peak_names):
         slice_start = time_slice[0]
         slice_end = time_slice[1]
         splines = {}
         charge_curve_slices = {}
-
-        # fit spline to charge curve of the reference
-        reference_charge_curve = self.get_charge_curve(reference_name)
-        charge_curve_slices[reference_name] = reference_charge_curve.slice(
-            slice_start, slice_end)
-        splines[reference_name] = (ChargeCurveSpline( 
-            charge_curve_slices[reference_name],
-            s[0]))
-        
-        # make all other splines
         for index, name in enumerate(peak_names):
             charge_curve = self.get_charge_curve(name)
             charge_curve_slices[name] = charge_curve.slice(
                 slice_start, slice_end)
             splines[name] = (ChargeCurveSpline(
                 charge_curve_slices[name],
-                s[index+1]))
+                s[index]))
+        return splines, charge_curve_slices
+    
+    def get_charge_referenced_peak_positions(self, 
+            time_slice, s = [0.02] * 3, 
+            reference_name = 'Au 4f', reference_energy = 84,
+            peak_names = ['O 1s', 'Ti 2p'],
+            plot_result = False):
+        if len(s) != len(peak_names) + 1:
+            raise IndexError(
+                's value needed for each peak type (including gold)')
+
+        splines, charge_curve_slices = self.get_charge_curve_splines(
+            time_slice, s, [reference_name] + peak_names)
         
         # find common time domain for all splines
         t_common_min = max([spline.start_time for spline in splines.values()])
@@ -122,7 +118,13 @@ class DataFile:
             charge_corrected_peak_positions,
             charge_correction_curve)
         if plot_result:
-            self.charge_reference.plot()
+            for peak_name in self.charge_reference.charge_curve_data.keys():
+                self.charge_reference.plot(peak_name)
+                plt.xlabel("Time (minutes)")
+                plt.ylabel("Binding Energy (eV)")
+                plt.title(peak_name)
+                plt.grid(color = 'gainsboro', linestyle = 'dashed')
+                plt.show()
         return
     
     def charge_reference_valence_band_spectra(self, 
