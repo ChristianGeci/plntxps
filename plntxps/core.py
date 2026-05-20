@@ -35,16 +35,17 @@ class DataFile:
         for name in self.spectrum_names:
             if len(name.strip()) > ljust_length:
                 ljust_length = len(name)
-        header = f"{"Index":<7}{"Name":<{ljust_length+2}}{"Time (min)"}"
+        header = f"{"Index":<7}{"Name":<{ljust_length+2}}{"Time (min)":<12}{"Comment":<20}"
         print("\x1B[4m" + header + "\x1B[0m")
         for index, spectrum in enumerate(self.spectra):
             row = (f"{index:<7}"
                  + f"{spectrum.name:<{ljust_length+2}}"
-                 + f"{spectrum.time:.2f}")
+                 + f"{spectrum.time:<12.2f}"
+                 + f"{spectrum.comment}")
             print(row)
             for operation in spectrum.child_operations:
                 print(f"{" " * 7}{operation.name}")
-            print()
+            print('.'*len(header))
 
     def get_charge_curve(self, region_name) -> ChargeCurve:
         times_locations = [(operation.parent.time, operation.peak_location)
@@ -390,9 +391,12 @@ def read_datafile(path: str) -> DataFile:
             case EntryType.SPECTRUM:
                 spectra.append(read_spectrum(entry))
             case EntryType.OPERATION:
-                operations.append(read_operation(entry, spectra[-1]))
-                spectra[-1].child_operations.append(operations[-1])
+                try:
+                    operations.append(read_operation(entry, spectra[-1]))
+                    spectra[-1].child_operations.append(operations[-1])
+                except Exception as e:
+                    print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
             case _:
                 pass
     return DataFile(spectra, operations)
-datafile = read_datafile
+datafile = read_datafile # legacy compatibility
