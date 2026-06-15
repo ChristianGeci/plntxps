@@ -382,23 +382,31 @@ class DataFile:
 def read_datafile(path: str) -> DataFile:
     with open(path, 'r') as f:
         text = f.read()
-    new_entry_pattern = r"\n\n"
-    entries = re.split(new_entry_pattern, text)
+    lines = text.split('\n')
+    data_blocks = [line[1] == r"#" for line in lines]
+    print(data_blocks)
+    #spectrum_pattern = r"# Region:"
+    #spectra_starts = []
+    #for index, line in lines:
+        #if re.match(spectrum_pattern, line):
+            #spectra_starts.append(index)
+            
+    #entries = re.split(new_entry_pattern, text)
     
     spectra = []
     operations = []
-    for entry in entries:
-        entry_type = get_entry_type(entry)
-        match entry_type:
-            case EntryType.SPECTRUM:
-                spectra.append(read_spectrum(entry))
-            case EntryType.OPERATION:
-                try:
-                    operations.append(read_operation(entry, spectra[-1]))
-                    spectra[-1].child_operations.append(operations[-1])
-                except Exception as e:
-                    print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
-            case _:
-                pass
+    #for entry in entries:
+        #entry_type = get_entry_type(entry)
+        #match entry_type:
+            #case EntryType.SPECTRUM:
+                #spectra.append(read_spectrum(entry))
+            #case EntryType.OPERATION:
+                #try:
+                    #operations.append(read_operation(entry, spectra[-1]))
+                    #spectra[-1].child_operations.append(operations[-1])
+                #except Exception as e:
+                    #print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
+            #case _:
+                #pass
     return DataFile(spectra, operations)
 datafile = read_datafile # legacy compatibility
