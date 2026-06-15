@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .read_utils import (get_data, get_time, is_peak_location,
-    get_region, get_comment, get_operation_name, get_center)
+    get_region, get_comment, get_operation_name, get_center, get_scan_number,
+    get_channel_number)
 from .peak_location import PeakLocation
 
 @dataclass
@@ -18,7 +19,9 @@ class Scan:
 def read_scan(header, data):
     eV, counts = get_data('\n'.join(data))
     time = get_time('\n'.join(header))
-    return Scan(counts, eV, 0, 0, time)
+    scan_number = get_scan_number('\n'.join(header))
+    channel_number = get_channel_number('\n'.join(header))
+    return Scan(counts, eV, scan_number, channel_number, time)
 
 @dataclass
 class Spectrum:
@@ -38,6 +41,10 @@ class Spectrum:
     def plot(self, ax = plt, **kwargs):
         ax.plot(self.eV, self.counts, **kwargs)
 
+    def masked_counts(self, channel_mask = [], scan_mask = []):
+        return np.sum([scan.counts for scan in self.scans
+                       if scan.channel_number not in channel_mask
+                       and scan.scan_number not in scan_mask], axis = 0)
     @property
     def counts(self):
         return np.sum([scan.counts for scan in self.scans], axis = 0)
