@@ -8,8 +8,22 @@ from .read_utils import (get_data, get_time, is_peak_location,
 from .peak_location import PeakLocation
 
 @dataclass
+class Scan:
+    counts: np.ndarray
+    eV: np.ndarray
+    scan_number: int
+    channel_number: int
+    time: float
+
+def read_scan(header, data):
+    eV, counts = get_data('\n'.join(data))
+    time = get_time('\n'.join(header))
+    return Scan(counts, eV, 0, 0, time)
+
+@dataclass
 class Spectrum:
     "Contains an XPS spectrum"
+    scans: list[Scan]
     counts: np.ndarray
     "XPS signal"
     eV: np.ndarray
@@ -53,7 +67,7 @@ class Spectrum:
         return Spectrum(counts=counts, eV=eV, name=None, comment=None,
                         time=None, child_operations=None, charge_correction=None)
 
-def read_spectrum(entry: str) -> Spectrum:
+def read_spectrum(header, data) -> Spectrum:
     """
     Read spectrum from data file section
     
@@ -62,11 +76,12 @@ def read_spectrum(entry: str) -> Spectrum:
     :return: Spectrum object
     :rtype: Spectrum
     """
-    eV, counts = get_data(entry)
-    time = get_time(entry)
-    name = get_region(entry)
-    comment = get_comment(entry)
-    return Spectrum(counts, eV, name, comment, time, [])
+    eV, counts = get_data('\n'.join(data))
+    time = get_time('\n'.join(header))
+    name = get_region('\n'.join(header))
+    comment = get_comment('\n'.join(header))
+    scans = [read_scan(header, data)]
+    return Spectrum(scans, counts, eV, name, comment, time, [])
 
 @dataclass 
 class Operation:
