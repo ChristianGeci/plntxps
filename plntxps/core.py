@@ -379,12 +379,33 @@ class DataFile:
         axs3[1].set_ylim(ypp.min()/2, ypp.max()/2)
         fig3.suptitle('second derivative')
 
+
+def check_data_block(line: str):
+    try:
+        return line[0] == r"#"
+    except:
+        return False
+
 def read_datafile(path: str) -> DataFile:
     with open(path, 'r') as f:
         text = f.read()
     lines = text.split('\n')
-    data_blocks = [line[1] == r"#" for line in lines]
-    print(data_blocks)
+    data_block_bools = np.array(
+        [check_data_block(line) for line in lines]).astype(int)
+    block_type_diff = np.diff(data_block_bools)
+    header_block_start_indices = np.union1d(np.array([0]), np.argwhere(block_type_diff == 1) + 1)
+    header_block_end_indices = np.argwhere(block_type_diff == -1)
+    data_block_start_indices = np.argwhere(block_type_diff == -1) + 1
+    data_block_end_indices = np.union1d(np.argwhere(block_type_diff == 1), np.array([len(lines) - 1]))
+
+    header_blocks = []
+    for block_start, block_end in zip(header_block_start_indices, header_block_end_indices):
+        header_blocks.append(lines[block_start:block_end[0] + 1])
+    
+    data_blocks = []
+    for block_start, block_end in zip(data_block_start_indices, data_block_end_indices):
+        data_blocks.append(lines[block_start[0]:block_end + 1])
+    return header_blocks, data_blocks
     #spectrum_pattern = r"# Region:"
     #spectra_starts = []
     #for index, line in lines:
