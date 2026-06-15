@@ -76,7 +76,8 @@ def read_spectrum(header, data) -> Spectrum:
     :return: Spectrum object
     :rtype: Spectrum
     """
-    eV, counts = get_data('\n'.join(data))
+    # todo: cleanup
+    eV, counts = get_data('\n'.join(data)) 
     time = get_time('\n'.join(header))
     name = get_region('\n'.join(header))
     comment = get_comment('\n'.join(header))
@@ -93,11 +94,12 @@ class Operation:
     parent_name: str
     peak_location: PeakLocation = None 
 
-def read_operation(entry, parent: Spectrum) -> Operation:
-    eV, counts = get_data(entry)
-    name = get_operation_name(entry)
+def read_operation(header, data, parent: Spectrum) -> Operation:
+    # todo: verify this works
+    eV, counts = get_data('\n'.join(data))
+    name = get_operation_name('\n'.join(header))
     result = Operation(counts, eV, name, parent, parent.name)
-    if is_peak_location(entry):
-        peak_location = get_center(entry)
+    if is_peak_location('\n'.join(header)):
+        peak_location = get_center('\n'.join(header))
         result.peak_location = peak_location
     return result

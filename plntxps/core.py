@@ -424,14 +424,12 @@ def read_datafile(path: str) -> DataFile:
             case EntryType.SCAN:
                 spectra[-1].scans.append(read_scan(header_block, data_block))
             case EntryType.OPERATION:
+                try:
+                    operations.append(read_operation(header_block, data_block, spectra[-1]))
+                    spectra[-1].child_operations.append(operations[-1])
+                except Exception as e:
+                    print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
+            case _:
                 pass
-                #try:
-                    #operations.append(read_operation(entry, spectra[-1]))
-                    #spectra[-1].child_operations.append(operations[-1])
-                #except Exception as e:
-                    #print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
-            #case _:
-                #pass
-    return spectra
     return DataFile(spectra, operations)
 datafile = read_datafile # legacy compatibility
