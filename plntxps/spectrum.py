@@ -24,8 +24,6 @@ def read_scan(header, data):
 class Spectrum:
     "Contains an XPS spectrum"
     scans: list[Scan]
-    counts: np.ndarray
-    "XPS signal"
     eV: np.ndarray
     "XPS binding energy (in eV)"
     name: str
@@ -39,6 +37,10 @@ class Spectrum:
     "Shift applied to binding energy to account for charging effects"
     def plot(self, ax = plt, **kwargs):
         ax.plot(self.eV, self.counts, **kwargs)
+
+    @property
+    def counts(self):
+        return np.sum([scan.counts for scan in self.scans], axis = 0)
 
     @property
     def eV_corrected(self) -> np.ndarray:
@@ -82,7 +84,7 @@ def read_spectrum(header, data) -> Spectrum:
     name = get_region('\n'.join(header))
     comment = get_comment('\n'.join(header))
     scans = [read_scan(header, data)]
-    return Spectrum(scans, counts, eV, name, comment, time, [])
+    return Spectrum(scans, eV, name, comment, time, [])
 
 @dataclass 
 class Operation:
