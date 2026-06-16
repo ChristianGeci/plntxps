@@ -389,43 +389,44 @@ def check_data_block(line: str):
 def read_datafile(path: str) -> DataFile:
     with open(path, 'r') as f:
         text = f.read()
-    lines = text.split('\n')
-    data_block_bools = np.array(
-        [check_data_block(line) for line in lines]).astype(int)
-    block_type_diff = np.diff(data_block_bools)
-    header_block_start_indices = np.union1d(np.array([0]), np.argwhere(block_type_diff == 1) + 1)
-    header_block_end_indices = np.argwhere(block_type_diff == -1)
-    data_block_start_indices = np.argwhere(block_type_diff == -1) + 1
-    data_block_end_indices = np.union1d(np.argwhere(block_type_diff == 1), np.array([len(lines) - 1]))
 
-    header_blocks = []
-    for block_start, block_end in zip(header_block_start_indices, header_block_end_indices):
-        header_blocks.append(lines[block_start:block_end[0] + 1])
-    
-    data_blocks = []
-    for block_start, block_end in zip(data_block_start_indices, data_block_end_indices):
-        data_blocks.append(lines[block_start[0]:block_end + 1])
-    #return header_blocks, data_blocks
-    #spectrum_pattern = r"# Region:"
-    #spectra_starts = []
-    #for index, line in lines:
-        #if re.match(spectrum_pattern, line):
-            #spectra_starts.append(index)
-            
-    #entries = re.split(new_entry_pattern, text)
-    
+    def parse_blocks(text: str) -> tuple[list[str]]:
+        header_blocks = []
+        data_blocks = []
+        lines = text.split('\n')
+
+        # ones denote headers lines, zeroes denote data lines
+        line_types = np.array(
+            [check_data_block(line) for line in lines]).astype(int)
+        # derivative is -1 when going from header to data, +1 in the reverse case
+        line_types_diff = np.diff(line_types)
+        header_block_start_indices = np.union1d(np.array([0]), np.argwhere(line_types_diff == 1) + 1)
+        header_block_end_indices = np.argwhere(line_types_diff == -1)
+        data_block_start_indices = np.argwhere(line_types_diff == -1) + 1
+        data_block_end_indices = np.union1d(np.argwhere(line_types_diff == 1), np.array([len(lines) - 1]))
+
+        for block_start, block_end in zip(header_block_start_indices, header_block_end_indices):
+            header_blocks.append(lines[block_start:block_end[0] + 1])
+        for block_start, block_end in zip(data_block_start_indices, data_block_end_indices):
+            data_blocks.append(lines[block_start[0]:block_end + 1])
+
+        return header_blocks, data_blocks
+    header_blocks, data_blocks = parse_blocks(text)
+
     spectra = []
     operations = []
     for header_block, data_block in zip(header_blocks, data_blocks):
-        entry_type = get_entry_type('\n'.join(header_block))
+        header = '\n'.join(header_block)
+        data   = '\n'.join(data_block)
+        entry_type = get_entry_type(header)
         match entry_type:
             case EntryType.SPECTRUM:
-                spectra.append(read_spectrum(header_block, data_block))
+                spectra.append(read_spectrum(header, data))
             case EntryType.SCAN:
-                spectra[-1].scans.append(read_scan(header_block, data_block))
+                spectra[-1].scans.append(read_scan(header, data))
             case EntryType.OPERATION:
                 try:
-                    operations.append(read_operation(header_block, data_block, spectra[-1]))
+                    operations.append(read_operation(header, data, spectra[-1]))
                     spectra[-1].child_operations.append(operations[-1])
                 except Exception as e:
                     print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")

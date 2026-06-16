@@ -17,10 +17,10 @@ class Scan:
     time: float
 
 def read_scan(header, data):
-    eV, counts = get_data('\n'.join(data))
-    time = get_time('\n'.join(header))
-    scan_number = get_scan_number('\n'.join(header))
-    channel_number = get_channel_number('\n'.join(header))
+    eV, counts = get_data(data)
+    time = get_time(header)
+    scan_number = get_scan_number(header)
+    channel_number = get_channel_number(header)
     return Scan(counts, eV, scan_number, channel_number, time)
 
 @dataclass
@@ -85,11 +85,10 @@ def read_spectrum(header, data) -> Spectrum:
     :return: Spectrum object
     :rtype: Spectrum
     """
-    # todo: cleanup
-    eV, counts = get_data('\n'.join(data)) 
-    time = get_time('\n'.join(header))
-    name = get_region('\n'.join(header))
-    comment = get_comment('\n'.join(header))
+    eV, counts = get_data(data) 
+    time = get_time(header)
+    name = get_region(header)
+    comment = get_comment(header)
     scans = [read_scan(header, data)]
     return Spectrum(scans, eV, name, comment, time, [])
 
@@ -105,10 +104,10 @@ class Operation:
 
 def read_operation(header, data, parent: Spectrum) -> Operation:
     # todo: verify this works
-    eV, counts = get_data('\n'.join(data))
-    name = get_operation_name('\n'.join(header))
+    eV, counts = get_data(data)
+    name = get_operation_name(header)
     result = Operation(counts, eV, name, parent, parent.name)
-    if is_peak_location('\n'.join(header)):
-        peak_location = get_center('\n'.join(header))
+    if is_peak_location(header):
+        peak_location = get_center(header)
         result.peak_location = peak_location
     return result
