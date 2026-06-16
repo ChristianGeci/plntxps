@@ -216,9 +216,10 @@ class DataFile:
         
         # store the data
         self.charge_corrected_valence_band = Spectrum(
-            eV = eV_window, counts = shifted_valence_band_sum, 
+            scans = [], eV = eV_window, 
             time = None, child_operations = None, comment = None,
             name = "charge corrected valence band")
+        self.charge_corrected_valence_band.counts = shifted_valence_band_sum
         
         # plotting stuff
         if (not plot_result):
@@ -391,6 +392,15 @@ def read_datafile(path: str) -> DataFile:
         text = f.read()
 
     def parse_blocks(text: str) -> tuple[list[str]]:
+        """
+        Takes the raw text of a SpecsLab data file and "chunks" it into header
+        blocks and data blocks.
+
+        :param text: Full text of a SpecsLab data file in .xy format
+        :type text: str
+        :return: A list of header blocks and a list of data blocks.
+        :rtype: tuple[list[str]]
+        """
         header_blocks = []
         data_blocks = []
         lines = text.split('\n')

@@ -10,6 +10,10 @@ from .peak_location import PeakLocation
 
 @dataclass
 class Scan:
+    """
+    Contains an individual XPS scan. Note that the Scan object can correspond
+    to literal scan data or separated channel data.
+    """
     counts: np.ndarray
     eV: np.ndarray
     scan_number: int
@@ -47,7 +51,13 @@ class Spectrum:
                        and scan.scan_number not in scan_mask], axis = 0)
     @property
     def counts(self):
-        return np.sum([scan.counts for scan in self.scans], axis = 0)
+        if hasattr(self, "_counts"):
+            return self._counts
+        return self.masked_counts()
+    @counts.setter
+    def counts(self, value):
+        self._counts = value
+
 
     @property
     def eV_corrected(self) -> np.ndarray:
@@ -73,15 +83,19 @@ class Spectrum:
         back_transposed_data = list(zip(*filtered_data))
         eV = np.array(back_transposed_data[0])
         counts = np.array(back_transposed_data[1])
-        return Spectrum(counts=counts, eV=eV, name=None, comment=None,
+        result = Spectrum(scans = [], eV=eV, name=None, comment=None,
                         time=None, child_operations=None, charge_correction=None)
+        result.counts = counts
+        return result
 
-def read_spectrum(header, data) -> Spectrum:
+def read_spectrum(header: str, data: str) -> Spectrum:
     """
-    Read spectrum from data file section
-    
-    :param entry: Section of data file that contains spectrum data and metadata
-    :type entry: str
+    Get spectrum object from text data
+
+    :param header: Spectrum header block
+    :type header: str   
+    :param data: Spectrum data block
+    :type header: str
     :return: Spectrum object
     :rtype: Spectrum
     """
@@ -102,7 +116,19 @@ class Operation:
     parent_name: str
     peak_location: PeakLocation = None 
 
-def read_operation(header, data, parent: Spectrum) -> Operation:
+def read_operation(header: str, data: str, parent: Spectrum) -> Operation:
+    """
+    Get operation object from text data
+
+    :param header: Operation header block
+    :type header: str   
+    :param data: Operation data block
+    :type data: str   
+    :param parent: Description
+    :type parent: Spectrum
+    :return: Description
+    :rtype: Operation
+    """
     # todo: verify this works
     eV, counts = get_data(data)
     name = get_operation_name(header)
