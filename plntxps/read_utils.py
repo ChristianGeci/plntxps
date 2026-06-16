@@ -6,7 +6,8 @@ from .peak_location import PeakLocation
 
 class EntryType(Enum):
     SPECTRUM = 0
-    OPERATION = 1
+    SCAN = 1
+    OPERATION = 2
 
 def get_data(entry):
     pattern = r"\n-*\d.*(?:$|\n)"
@@ -48,9 +49,12 @@ def get_comment(entry):
 
 def get_entry_type(entry):
     spectrum_pattern = r"# Region:.*\n"
+    scan_pattern = r'# Acquisition Date:.*\n'
     operation_pattern = r"# Operation:.*\n"
     if re.search(spectrum_pattern, entry) is not None:
         return EntryType.SPECTRUM
+    if re.search(scan_pattern, entry) is not None:
+        return EntryType.SCAN
     if re.search(operation_pattern, entry) is not None:
         return EntryType.OPERATION
     
@@ -78,3 +82,21 @@ def is_peak_location(entry):
     if re.search(pattern, entry) is None:
         return False
     return True
+
+def get_scan_number(header):
+    pattern = r'Scan: \d+'
+    unwanted_part = r'Scan: '
+    search = re.search(pattern, header)
+    if search is None:
+        return "Sum"
+    scan_number = re.sub(unwanted_part, "", search.group())
+    return int(scan_number) + 1
+
+def get_channel_number(header):
+    pattern = r'Channel: \d+'
+    unwanted_part = r'Channel: '
+    search = re.search(pattern, header)
+    if search is None:
+        return "Sum"
+    channel_number = re.sub(unwanted_part, "", search.group())
+    return int(channel_number) + 1

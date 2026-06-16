@@ -4,14 +4,33 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .read_utils import (get_data, get_time, is_peak_location,
-    get_region, get_comment, get_operation_name, get_center)
+    get_region, get_comment, get_operation_name, get_center, get_scan_number,
+    get_channel_number)
 from .peak_location import PeakLocation
+
+@dataclass
+class Scan:
+    """
+    Contains an individual XPS scan. Note that the Scan object can correspond
+    to literal scan data or separated channel data.
+    """
+    counts: np.ndarray
+    eV: np.ndarray
+    scan_number: int
+    channel_number: int
+    time: float
+
+def read_scan(header, data):
+    eV, counts = get_data(data)
+    time = get_time(header)
+    scan_number = get_scan_number(header)
+    channel_number = get_channel_number(header)
+    return Scan(counts, eV, scan_number, channel_number, time)
 
 @dataclass
 class Spectrum:
     "Contains an XPS spectrum"
-    counts: np.ndarray
-    "XPS signal"
+    scans: list[Scan]
     eV: np.ndarray
     "XPS binding energy (in eV)"
     name: str
@@ -25,6 +44,20 @@ class Spectrum:
     "Shift applied to binding energy to account for charging effects"
     def plot(self, ax = plt, **kwargs):
         ax.plot(self.eV, self.counts, **kwargs)
+
+    def masked_counts(self, channel_mask = [], scan_mask = []):
+        return np.sum([scan.counts for scan in self.scans
+                       if scan.channel_number not in channel_mask
+                       and scan.scan_number not in scan_mask], axis = 0)
+    @property
+    def counts(self):
+        if hasattr(self, "_counts"):
+            return self._counts
+        return self.masked_counts()
+    @counts.setter
+    def counts(self, value):
+        self._counts = value
+
 
     @property
     def eV_corrected(self) -> np.ndarray:
@@ -50,23 +83,28 @@ class Spectrum:
         back_transposed_data = list(zip(*filtered_data))
         eV = np.array(back_transposed_data[0])
         counts = np.array(back_transposed_data[1])
-        return Spectrum(counts=counts, eV=eV, name=None, comment=None,
+        result = Spectrum(scans = [], eV=eV, name=None, comment=None,
                         time=None, child_operations=None, charge_correction=None)
+        result.counts = counts
+        return result
 
-def read_spectrum(entry: str) -> Spectrum:
+def read_spectrum(header: str, data: str) -> Spectrum:
     """
-    Read spectrum from data file section
-    
-    :param entry: Section of data file that contains spectrum data and metadata
-    :type entry: str
+    Get spectrum object from text data
+
+    :param header: Spectrum header block
+    :type header: str   
+    :param data: Spectrum data block
+    :type header: str
     :return: Spectrum object
     :rtype: Spectrum
     """
-    eV, counts = get_data(entry)
-    time = get_time(entry)
-    name = get_region(entry)
-    comment = get_comment(entry)
-    return Spectrum(counts, eV, name, comment, time, [])
+    eV, counts = get_data(data) 
+    time = get_time(header)
+    name = get_region(header)
+    comment = get_comment(header)
+    scans = [read_scan(header, data)]
+    return Spectrum(scans, eV, name, comment, time, [])
 
 @dataclass 
 class Operation:
@@ -78,11 +116,24 @@ class Operation:
     parent_name: str
     peak_location: PeakLocation = None 
 
-def read_operation(entry, parent: Spectrum) -> Operation:
-    eV, counts = get_data(entry)
-    name = get_operation_name(entry)
+def read_operation(header: str, data: str, parent: Spectrum) -> Operation:
+    """
+    Get operation object from text data
+
+    :param header: Operation header block
+    :type header: str   
+    :param data: Operation data block
+    :type data: str   
+    :param parent: Description
+    :type parent: Spectrum
+    :return: Description
+    :rtype: Operation
+    """
+    # todo: verify this works
+    eV, counts = get_data(data)
+    name = get_operation_name(header)
     result = Operation(counts, eV, name, parent, parent.name)
-    if is_peak_location(entry):
-        peak_location = get_center(entry)
+    if is_peak_location(header):
+        peak_location = get_center(header)
         result.peak_location = peak_location
     return result

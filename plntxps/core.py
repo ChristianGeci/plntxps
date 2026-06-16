@@ -9,7 +9,7 @@ import re
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 
-from .spectrum import read_spectrum, Spectrum, read_operation, Operation
+from .spectrum import read_spectrum, Spectrum, read_operation, Operation, read_scan, Scan
 from .read_utils import EntryType, get_entry_type
 from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_curve_spline import ChargeCurveSpline
@@ -216,9 +216,10 @@ class DataFile:
         
         # store the data
         self.charge_corrected_valence_band = Spectrum(
-            eV = eV_window, counts = shifted_valence_band_sum, 
+            scans = [], eV = eV_window, 
             time = None, child_operations = None, comment = None,
             name = "charge corrected valence band")
+        self.charge_corrected_valence_band.counts = shifted_valence_band_sum
         
         # plotting stuff
         if (not plot_result):
@@ -379,22 +380,63 @@ class DataFile:
         axs3[1].set_ylim(ypp.min()/2, ypp.max()/2)
         fig3.suptitle('second derivative')
 
+
+def check_data_block(line: str):
+    try:
+        return line[0] == r"#"
+    except:
+        return False
+
 def read_datafile(path: str) -> DataFile:
     with open(path, 'r') as f:
         text = f.read()
-    new_entry_pattern = r"\n\n"
-    entries = re.split(new_entry_pattern, text)
-    
+
+    def parse_blocks(text: str) -> tuple[list[str]]:
+        """
+        Takes the raw text of a SpecsLab data file and "chunks" it into header
+        blocks and data blocks.
+
+        :param text: Full text of a SpecsLab data file in .xy format
+        :type text: str
+        :return: A list of header blocks and a list of data blocks.
+        :rtype: tuple[list[str]]
+        """
+        header_blocks = []
+        data_blocks = []
+        lines = text.split('\n')
+
+        # ones denote headers lines, zeroes denote data lines
+        line_types = np.array(
+            [check_data_block(line) for line in lines]).astype(int)
+        # derivative is -1 when going from header to data, +1 in the reverse case
+        line_types_diff = np.diff(line_types)
+        header_block_start_indices = np.union1d(np.array([0]), np.argwhere(line_types_diff == 1) + 1)
+        header_block_end_indices = np.argwhere(line_types_diff == -1)
+        data_block_start_indices = np.argwhere(line_types_diff == -1) + 1
+        data_block_end_indices = np.union1d(np.argwhere(line_types_diff == 1), np.array([len(lines) - 1]))
+
+        for block_start, block_end in zip(header_block_start_indices, header_block_end_indices):
+            header_blocks.append(lines[block_start:block_end[0] + 1])
+        for block_start, block_end in zip(data_block_start_indices, data_block_end_indices):
+            data_blocks.append(lines[block_start[0]:block_end + 1])
+
+        return header_blocks, data_blocks
+    header_blocks, data_blocks = parse_blocks(text)
+
     spectra = []
     operations = []
-    for entry in entries:
-        entry_type = get_entry_type(entry)
+    for header_block, data_block in zip(header_blocks, data_blocks):
+        header = '\n'.join(header_block)
+        data   = '\n'.join(data_block)
+        entry_type = get_entry_type(header)
         match entry_type:
             case EntryType.SPECTRUM:
-                spectra.append(read_spectrum(entry))
+                spectra.append(read_spectrum(header, data))
+            case EntryType.SCAN:
+                spectra[-1].scans.append(read_scan(header, data))
             case EntryType.OPERATION:
                 try:
-                    operations.append(read_operation(entry, spectra[-1]))
+                    operations.append(read_operation(header, data, spectra[-1]))
                     spectra[-1].child_operations.append(operations[-1])
                 except Exception as e:
                     print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
