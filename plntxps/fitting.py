@@ -55,7 +55,9 @@ def plot_fit_result(spectrum, fit_result):
     spectrum.plot(color = 'black', label = 'data')
     plt.plot(spectrum.eV, fit_result.best_fit, label = 'fit')
     boilerplate()
-    background = 'shirley_'
+    background = 'tougaard_'
+    if 'shirley_' in components.keys():
+        background = 'shirley_'
     print("FIT RESULT:")
     for name, curve in components.items():
         if name != background:
@@ -69,9 +71,10 @@ def plot_fit_result(spectrum, fit_result):
 
 
 def fit_procedure(spectrum, peaks, params_path,
-        plot_guess = False, plot_result = False):
+        plot_guess = False, plot_result = False,
+        bg_type = "tougaard"):
     fit_model = setup_fit(spectrum, peaks, params_path, 
-        plot_guess=plot_guess)
+        plot_guess = plot_guess, bg_type = bg_type)
     result = do_fit(spectrum, fit_model, params_path,
         plot_result = plot_result)
     return result
