@@ -10,8 +10,13 @@ def boilerplate():
     plt.xlabel("Binding Energy (eV)")
     plt.ylabel("Counts per Second")
 
-def setup_fit(spectrum, peaks, params_path, plot_guess = True):
-    bg = models.ShirleyBG(independent_vars=["y"], prefix='shirley_')
+def setup_fit(spectrum, peaks, params_path, plot_guess = True, bg_type = "tougaard"):
+    if bg_type == "shirley":
+        bg = models.ShirleyBG(independent_vars = ["y"], prefix = 'shirley_')
+    elif bg_type == "tougaard":
+        bg = models.TougaardBG(independent_vars = ["x", "y"], prefix = 'tougaard_')
+    else:
+        raise ValueError("Background type not recognized")
     fit_model = bg
     for peak in peaks:
         fit_model += models.ConvGaussianDoniachSinglett(
