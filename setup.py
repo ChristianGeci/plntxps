@@ -13,6 +13,8 @@ setup(
                       'numpy',
                       'scipy',
                       'matplotlib',
+                      'lmfit',
+                      'lmfitxps',
                       ],
 
     classifiers=[
