@@ -47,6 +47,13 @@ def get_comment(entry):
     comment = re.sub(unwanted_part, "", comment_line)
     return comment.strip()
 
+def get_id(entry):
+    pattern = r"# Spectrum ID:.*\n"
+    id_line = re.search(pattern, entry).group()
+    unwanted_part = r"# Spectrum ID:\s*"
+    id = re.sub(unwanted_part, "", id_line)
+    return id.strip()
+
 def get_entry_type(entry):
     spectrum_pattern = r"# Region:.*\n"
     scan_pattern = r'# Acquisition Date:.*\n'
