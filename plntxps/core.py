@@ -15,6 +15,7 @@ from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
+from .fitting import *
 
 @dataclass
 class DataFile:
