@@ -41,10 +41,16 @@ def get_region(entry):
     return region_name.strip()
 
 def get_comment(entry):
-    pattern = r"# Comment:.*\n"
-    comment_line = re.search(pattern, entry).group()
-    unwanted_part = r"# Comment:\s*"
-    comment = re.sub(unwanted_part, "", comment_line)
+    pattern = r"# Comment:.*?Cycle: "
+    comment_line = re.search(pattern, entry, re.S).group()
+    unwanted_parts = [
+        r"# Comment:\s*",
+        r'\n# Cycle:.*',
+    ]
+    comment = comment_line
+    for unwanted_part in unwanted_parts:
+        comment = re.sub(unwanted_part, "", comment)
+    comment = re.sub(r'#\s*', ' '*35, comment) # todo: get rid of magic number
     return comment.strip()
 
 def get_id(entry):
