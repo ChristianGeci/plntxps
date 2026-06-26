@@ -32,21 +32,26 @@ class DataFile:
         return self.spectra[0].time
 
     def list_spectra(self):
+        print(self.spectrum_list())
+    
+    def spectrum_list(self):
+        result = ""
         ljust_length = 5
         for name in self.spectrum_names:
             if len(name.strip()) > ljust_length:
                 ljust_length = len(name)
         header = f"{"Index":<7}{"Name":<{ljust_length+2}}{"Time (min)":<12}{"Comment":<20}"
-        print("\x1B[4m" + header + "\x1B[0m")
+        result += "\x1B[4m" + header + "\x1B[0m" + '\n'
         for index, spectrum in enumerate(self.spectra):
             row = (f"{index:<7}"
                  + f"{spectrum.name:<{ljust_length+2}}"
                  + f"{spectrum.time:<12.2f}"
                  + f"{spectrum.comment}")
-            print(row)
+            result += row + '\n'
             for operation in spectrum.child_operations:
-                print(f"{" " * 7}{operation.name}")
-            print('.'*len(header))
+                result += f"{" " * 7}{operation.name}" + '\n'
+            result += '.'*len(header) + '\n'
+        return result
 
     def get_charge_curve(self, region_name) -> ChargeCurve:
         times_locations = [(operation.parent.time, operation.peak_location)
