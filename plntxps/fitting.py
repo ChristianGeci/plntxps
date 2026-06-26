@@ -50,7 +50,7 @@ def do_fit(spectrum, fit_model, params_path, plot_result = True):
 
     return result
 
-def plot_fit_result(spectrum, fit_result):
+def plot_fit_result(spectrum, fit_result, show = True):
     components = fit_result.eval_components(x = spectrum.eV, y = spectrum.counts)
     spectrum.plot(color = 'black', label = 'data')
     plt.plot(spectrum.eV, fit_result.best_fit, label = 'fit')
@@ -58,7 +58,6 @@ def plot_fit_result(spectrum, fit_result):
     background = 'tougaard_'
     if 'shirley_' in components.keys():
         background = 'shirley_'
-    print("FIT RESULT:")
     for name, curve in components.items():
         if name != background:
             adjusted_curve = curve + components[background]
@@ -67,7 +66,9 @@ def plot_fit_result(spectrum, fit_result):
         plt.plot(spectrum.eV, adjusted_curve, label = name[:-1], ls = 'dashed')
     
     plt.legend()
-    plt.show()
+    if show:
+        print("FIT RESULT:")
+        plt.show()
 
 
 def fit_procedure(spectrum, peaks, params_path,
