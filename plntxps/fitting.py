@@ -10,7 +10,11 @@ def boilerplate():
     plt.xlabel("Binding Energy (eV)")
     plt.ylabel("Counts per Second")
 
-def setup_fit(spectrum, peaks, params_path, plot_guess = True, bg_type = "tougaard"):
+def auto_shirley(params, spectrum):
+    params['shirley_const'].value = np.min(spectrum.counts)
+
+def setup_fit(spectrum, peaks, params_path, plot_guess = True, bg_type = "tougaard",
+        guess_shirley = False):
     if bg_type == "shirley":
         bg = models.ShirleyBG(independent_vars = ["y"], prefix = 'shirley_')
     elif bg_type == "tougaard":
@@ -24,12 +28,15 @@ def setup_fit(spectrum, peaks, params_path, plot_guess = True, bg_type = "tougaa
 
     lmfext.make_params_file(fit_model, params_path)
     if plot_guess:
-        plot_initial_guess(fit_model, params_path, spectrum)
+        plot_initial_guess(fit_model, params_path, spectrum, guess_shirley)
     return fit_model
 
-def plot_initial_guess(fit_model, params_path, spectrum):
+def plot_initial_guess(fit_model, params_path, spectrum, guess_shirley):
+    params = lmfext.read_params(params_path)
+    if guess_shirley:
+        auto_shirley(params, spectrum)
     initial_guess = fit_model.eval(
-    lmfext.read_params(params_path),
+        params,
         y = spectrum.counts,
         x = spectrum.eV,
     )
@@ -40,8 +47,10 @@ def plot_initial_guess(fit_model, params_path, spectrum):
     plt.legend()
     plt.show()
 
-def do_fit(spectrum, fit_model, params_path, plot_result = True):
+def do_fit(spectrum, fit_model, params_path, guess_shirley, plot_result = True):
     params = lmfext.read_params(params_path)
+    if guess_shirley:
+        auto_shirley(params, spectrum)
     result = fit_model.fit(spectrum.counts, params,
         x = spectrum.eV, y = spectrum.counts)
 
@@ -71,11 +80,11 @@ def plot_fit_result(spectrum, fit_result, show = True):
         plt.show()
 
 
-def fit_procedure(spectrum, peaks, params_path,
+def fit_procedure(spectrum, peaks, params_path, guess_shirley = False,
         plot_guess = False, plot_result = False,
         bg_type = "tougaard"):
-    fit_model = setup_fit(spectrum, peaks, params_path, 
+    fit_model = setup_fit(spectrum, peaks, params_path, guess_shirley = guess_shirley,
         plot_guess = plot_guess, bg_type = bg_type)
-    result = do_fit(spectrum, fit_model, params_path,
+    result = do_fit(spectrum, fit_model, params_path, guess_shirley,
         plot_result = plot_result)
     return result
