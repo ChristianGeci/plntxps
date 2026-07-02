@@ -1,0 +1,8 @@
+Parameter	value	min	max	vary	expr
+example_amplitude	100.0	0.0	inf	True	
+example_sigma	0.2	0.0	inf	True	
+example_gamma	0.02	-inf	inf	True	
+example_gaussian_sigma	0.2	0.0	inf	True	
+example_center	100.0	0.0	inf	True	
+example_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*example_gaussian_sigma*1.1774
+example_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	example_sigma*(2+example_gamma*2.5135+(example_gamma*3.6398)**4)

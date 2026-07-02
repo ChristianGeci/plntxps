@@ -13,3 +13,4 @@ tests/.ipynb_checkpoints
 plntxps/xpsdb/.ipynb_checkpoints/csv generator-checkpoint.ipynb
 tests/.jupyter
 tests/.jupyter_ystore.db
+.ipynb_checkpoints
