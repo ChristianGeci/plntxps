@@ -3,41 +3,41 @@ example_amplitude	100.0	0.0	inf	True
 example_sigma	0.2	0.0	inf	True	
 example_gamma	0.02	-inf	inf	True	
 example_gaussian_sigma	0.2	0.0	inf	True	
-example_center	100.0	0.0	inf	True	
+example_center	250.0	0.0	inf	True	
 example_gaussian_fwhm	0.47096	-inf	inf	False	2*example_gaussian_sigma*1.1774
 example_lorentzian_fwhm	0.4100596164262561	-inf	inf	False	example_sigma*(2+example_gamma*2.5135+(example_gamma*3.6398)**4)
 example_alpha_3_amplitude				False	example_amplitude*8.0/100
 example_alpha_3_sigma				False	example_sigma
 example_alpha_3_gamma				False	example_gamma
 example_alpha_3_gaussian_sigma				False	example_gaussian_sigma
-example_alpha_3_center				False	example_center+8.4
+example_alpha_3_center				False	example_center-8.4
 example_alpha_3_gaussian_fwhm				False	2*example_alpha_3_gaussian_sigma*1.1774
 example_alpha_3_lorentzian_fwhm				False	example_alpha_3_sigma*(2+example_alpha_3_gamma*2.5135+(example_alpha_3_gamma*3.6398)**4)
 example_alpha_4_amplitude				False	example_amplitude*4.1/100
 example_alpha_4_sigma				False	example_sigma
 example_alpha_4_gamma				False	example_gamma
 example_alpha_4_gaussian_sigma				False	example_gaussian_sigma
-example_alpha_4_center				False	example_center+10.1
+example_alpha_4_center				False	example_center-10.1
 example_alpha_4_gaussian_fwhm				False	2*example_alpha_4_gaussian_sigma*1.1774
 example_alpha_4_lorentzian_fwhm				False	example_alpha_4_sigma*(2+example_alpha_4_gamma*2.5135+(example_alpha_4_gamma*3.6398)**4)
 example_alpha_5_amplitude				False	example_amplitude*0.6/100
 example_alpha_5_sigma				False	example_sigma
 example_alpha_5_gamma				False	example_gamma
 example_alpha_5_gaussian_sigma				False	example_gaussian_sigma
-example_alpha_5_center				False	example_center+17.6
+example_alpha_5_center				False	example_center-17.6
 example_alpha_5_gaussian_fwhm				False	2*example_alpha_5_gaussian_sigma*1.1774
 example_alpha_5_lorentzian_fwhm				False	example_alpha_5_sigma*(2+example_alpha_5_gamma*2.5135+(example_alpha_5_gamma*3.6398)**4)
 example_alpha_6_amplitude				False	example_amplitude*0.5/100
 example_alpha_6_sigma				False	example_sigma
 example_alpha_6_gamma				False	example_gamma
 example_alpha_6_gaussian_sigma				False	example_gaussian_sigma
-example_alpha_6_center				False	example_center+20.3
+example_alpha_6_center				False	example_center-20.3
 example_alpha_6_gaussian_fwhm				False	2*example_alpha_6_gaussian_sigma*1.1774
 example_alpha_6_lorentzian_fwhm				False	example_alpha_6_sigma*(2+example_alpha_6_gamma*2.5135+(example_alpha_6_gamma*3.6398)**4)
 example_beta_amplitude				False	example_amplitude*0.5/100
 example_beta_sigma				False	example_sigma
 example_beta_gamma				False	example_gamma
 example_beta_gaussian_sigma				False	example_gaussian_sigma
-example_beta_center				False	example_center+48.7
+example_beta_center				False	example_center-48.7
 example_beta_gaussian_fwhm				False	2*example_beta_gaussian_sigma*1.1774
 example_beta_lorentzian_fwhm				False	example_beta_sigma*(2+example_beta_gamma*2.5135+(example_beta_gamma*3.6398)**4)
