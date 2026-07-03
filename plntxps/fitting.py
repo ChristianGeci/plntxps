@@ -16,59 +16,34 @@ def auto_shirley(params, counts):
     params['shirley_const'].value = np.min(counts)
 
 def read_satellite_peaks(path):
+    satellites = pd.read_csv(path,
+        sep = '\t').to_dict(orient='index')
     def format_satellite_name(name):
         formatted_name = re.sub(r" ", "_", name)
         formatted_name = re.sub(r",", "", formatted_name)
         return formatted_name
-
-    satellites = pd.read_csv(path,
-        sep = '\t').to_dict(orient='index')
-
     for satellite in satellites.values():
         satellite['name'] = format_satellite_name(satellite['name'])
-    
     return satellites
 
-def setup_satellite_params(peaks, satellites):
-    def get_satellite_row(name, expr):
-        result = {
-            "Parameter": name,
-            "value": "",
-            "min": "",
-            "max": "",
-            "vary": "False",
-            "expr": expr,
-        }
-        return result
-    def get_rows(parent_prefix, satellite):
-        full_prefix = parent_prefix + satellite['name'] + '_'
-        rows = []
-        rows.append(get_satellite_row(f"{full_prefix}amplitude",
-                    f"{parent_prefix}amplitude*{satellite['intensity']}/100"))
-        rows.append(get_satellite_row(f"{full_prefix}sigma", f"{parent_prefix}sigma"))
-        rows.append(get_satellite_row(f"{full_prefix}gamma", f"{parent_prefix}gamma"))
-        rows.append(get_satellite_row(f"{full_prefix}gaussian_sigma", f"{parent_prefix}gaussian_sigma"))
-        rows.append(get_satellite_row(f"{full_prefix}center",
-                    f"{parent_prefix}center-{satellite['position']}"))
-            
-        rows.append(get_satellite_row(f"{full_prefix}gaussian_fwhm",
-                f'2*{full_prefix}gaussian_sigma*1.1774'))
-        rows.append(get_satellite_row(f"{full_prefix}lorentzian_fwhm",
-                f'{full_prefix}sigma*(2+{full_prefix}gamma*2.5135+({full_prefix}gamma*3.6398)**4)'))
-        return rows
-    satellite_rows = []
-    for peak in peaks:
-        for n in range(1, len(satellites)):
-            satellite_rows += get_rows(peak + "_", satellites[n])
-    return pd.DataFrame(satellite_rows)
+def set_satellite_param_hints(model, parent_prefix, satellite):
+    model.set_param_hint(
+        'amplitude', expr = f"{parent_prefix}_amplitude*{satellite['intensity']/100}")
+    model.set_param_hint(
+        'center', expr = f"{parent_prefix}_center-{satellite['position']}")
+    model.set_param_hint('sigma', expr = f"{parent_prefix}_sigma")
+    model.set_param_hint('gamma', expr = f"{parent_prefix}_gamma")
+    model.set_param_hint('gaussian_sigma', expr = f"{parent_prefix}_gaussian_sigma")
 
 def setup_satellite_models(peaks, satellites):
     fit_models = []
     for peak in peaks:
         for n in range(1, len(satellites)):
-            fit_models.append(models.ConvGaussianDoniachSinglett(
+            satellite_model = models.ConvGaussianDoniachSinglett(
                 prefix = f"{peak}_{satellites[n]['name']}_",
-                independent_vars = ["x"]))
+                independent_vars = ["x"])
+            set_satellite_param_hints(satellite_model, peak, satellites[n])
+            fit_models.append(satellite_model)
     return fit_models
 
 def setup_model(peaks, bg_type, satellites):
