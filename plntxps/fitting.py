@@ -96,17 +96,37 @@ def plot_initial_guess(fit_model, params_path, eV, counts, guess_shirley):
     plt.legend()
     plt.show()
 
-def do_fit(eV, counts, fit_model, params_path, guess_shirley, plot_result = True):
+def do_fit(eV, counts, fit_model, params_path, guess_shirley):
     params = lmfext.read_params(params_path)
     if guess_shirley:
         auto_shirley(params, counts)
     result = fit_model.fit(counts, params,
         x = eV, y = counts)
-    if plot_result:
-        plot_fit_result(eV, counts, result)
     return result
 
-def plot_fit_result(eV, counts, fit_result, show = True, custom_background = None):
+
+def group_components(components, satellites):
+    component_table = {}
+    # get parent peaks
+    for curve_name in components.keys():
+        is_satellite = False
+        for satellite in satellites.values():
+            if satellite['name'] in curve_name:
+                is_satellite = True
+        if not is_satellite:
+            component_table[curve_name] = [curve_name]
+    # get satellites
+    for parent_curve in list(component_table.keys()):
+        for n in range(1, len(satellites)):
+            component_table[parent_curve].append(
+                f"{parent_curve}{satellites[n]['name']}_")
+    result = {}
+    for parent_peak_name, child_peak_names in component_table.items():
+        curves = [components[child_peak_name] for child_peak_name in child_peak_names]
+        result[parent_peak_name] = np.sum(curves, axis = 0)
+    return result
+
+def plot_fit_result(eV, counts, fit_result, satellites, show = True, custom_background = None):
     components = fit_result.eval_components(x = eV, y = counts)
     plt.plot(eV, counts, color = 'black', label = 'data')
     boilerplate()
@@ -129,7 +149,11 @@ def plot_fit_result(eV, counts, fit_result, show = True, custom_background = Non
     else:
         plt.plot(eV, fit_result.best_fit, label = 'fit')
 
-    for name, curve in components.items():
+    if type(satellites) != type(None):
+        grouped_components = group_components(components, satellites)
+    else:
+        grouped_components = components
+    for name, curve in grouped_components.items():
         if name != background_name and background_name != 'none':
             adjusted_curve = curve + background
         else:
@@ -147,6 +171,7 @@ def fit_procedure(eV, counts, peaks, params_path, guess_shirley = False,
     fit_model = setup_fit(eV, counts, peaks, params_path,
         satellites = satellites, guess_shirley = guess_shirley,
         plot_guess = plot_guess, bg_type = bg_type)
-    result = do_fit(eV, counts, fit_model, params_path, guess_shirley,
-        plot_result = plot_result)
+    result = do_fit(eV, counts, fit_model, params_path, guess_shirley)
+    if plot_result:
+        plot_fit_result(eV, counts, result, satellites)
     return result
