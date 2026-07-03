@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+import re
 import lmfit
 import lmfext
 from lmfitxps import models
@@ -13,8 +15,63 @@ def boilerplate():
 def auto_shirley(params, counts):
     params['shirley_const'].value = np.min(counts)
 
-def setup_fit(eV, counts, peaks, params_path, plot_guess = True, bg_type = "tougaard",
-        guess_shirley = False):
+def read_satellite_peaks(path):
+    def format_satellite_name(name):
+        formatted_name = re.sub(r" ", "_", name)
+        formatted_name = re.sub(r",", "", formatted_name)
+        return formatted_name
+
+    satellites = pd.read_csv(path,
+        sep = '\t').to_dict(orient='index')
+
+    for satellite in satellites.values():
+        satellite['name'] = format_satellite_name(satellite['name'])
+    
+    return satellites
+
+def setup_satellite_params(peaks, satellites):
+    def get_satellite_row(name, expr):
+        result = {
+            "Parameter": name,
+            "value": "",
+            "min": "",
+            "max": "",
+            "vary": "False",
+            "expr": expr,
+        }
+        return result
+    def get_rows(parent_prefix, satellite):
+        full_prefix = parent_prefix + satellite['name'] + '_'
+        rows = []
+        rows.append(get_satellite_row(f"{full_prefix}amplitude",
+                    f"{parent_prefix}amplitude*{satellite['intensity']}/100"))
+        rows.append(get_satellite_row(f"{full_prefix}sigma", f"{parent_prefix}sigma"))
+        rows.append(get_satellite_row(f"{full_prefix}gamma", f"{parent_prefix}gamma"))
+        rows.append(get_satellite_row(f"{full_prefix}gaussian_sigma", f"{parent_prefix}gaussian_sigma"))
+        rows.append(get_satellite_row(f"{full_prefix}center",
+                    f"{parent_prefix}center-{satellite['position']}"))
+            
+        rows.append(get_satellite_row(f"{full_prefix}gaussian_fwhm",
+                f'2*{full_prefix}gaussian_sigma*1.1774'))
+        rows.append(get_satellite_row(f"{full_prefix}lorentzian_fwhm",
+                f'{full_prefix}sigma*(2+{full_prefix}gamma*2.5135+({full_prefix}gamma*3.6398)**4)'))
+        return rows
+    satellite_rows = []
+    for peak in peaks:
+        for n in range(1, len(satellites)):
+            satellite_rows += get_rows(peak + "_", satellites[n])
+    return pd.DataFrame(satellite_rows)
+
+def setup_satellite_models(peaks, satellites):
+    fit_models = []
+    for peak in peaks:
+        for n in range(1, len(satellites)):
+            fit_models.append(models.ConvGaussianDoniachSinglett(
+                prefix = f"{peak}_{satellites[n]['name']}_",
+                independent_vars = ["x"]))
+    return fit_models
+
+def setup_model(peaks, bg_type, satellites):
     fit_models = []
     if bg_type == "shirley":
         fit_models.append(models.ShirleyBG(independent_vars = ["y"], prefix = 'shirley_'))
@@ -28,10 +85,20 @@ def setup_fit(eV, counts, peaks, params_path, plot_guess = True, bg_type = "toug
         fit_models.append(models.ConvGaussianDoniachSinglett(
             prefix = peak + '_', independent_vars = ["x"]))
 
+    if type(satellites) != type(None):
+        fit_models += setup_satellite_models(peaks, satellites)
+
     fit_model = fit_models[0]
     if len(fit_models) > 1:
         for model in fit_models[1:]:
             fit_model += model
+
+    return fit_model
+
+def setup_fit(eV, counts, peaks, params_path, satellites = None, 
+              plot_guess = True, bg_type = "tougaard",
+              guess_shirley = False):
+    fit_model = setup_model(peaks, bg_type, satellites)
 
     lmfext.make_params_file(fit_model, params_path)
     if plot_guess:
@@ -60,10 +127,8 @@ def do_fit(eV, counts, fit_model, params_path, guess_shirley, plot_result = True
         auto_shirley(params, counts)
     result = fit_model.fit(counts, params,
         x = eV, y = counts)
-
     if plot_result:
         plot_fit_result(eV, counts, result)
-
     return result
 
 def plot_fit_result(eV, counts, fit_result, show = True, custom_background = None):
@@ -103,9 +168,10 @@ def plot_fit_result(eV, counts, fit_result, show = True, custom_background = Non
         plt.show()
 
 def fit_procedure(eV, counts, peaks, params_path, guess_shirley = False,
-        plot_guess = False, plot_result = False,
+        plot_guess = False, plot_result = False, satellites = None,
         bg_type = "tougaard"):
-    fit_model = setup_fit(eV, counts, peaks, params_path, guess_shirley = guess_shirley,
+    fit_model = setup_fit(eV, counts, peaks, params_path,
+        satellites = satellites, guess_shirley = guess_shirley,
         plot_guess = plot_guess, bg_type = bg_type)
     result = do_fit(eV, counts, fit_model, params_path, guess_shirley,
         plot_result = plot_result)
