@@ -136,7 +136,6 @@ def plot_fit_result(eV, counts, fit_result, show = True, custom_background = Non
             adjusted_curve = curve
         plt.plot(eV, adjusted_curve, label = name[:-1], ls = 'dashed')
 
-    
     plt.legend()
     if show:
         print("FIT RESULT:")

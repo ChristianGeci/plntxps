@@ -1,20 +1,9 @@
 Parameter	value	min	max	vary	expr
-tougaard_B	2886	-inf	inf	True	
-tougaard_C	1643	-inf	inf	True	
-tougaard_C_d	1	-inf	inf	True	
-tougaard_D	1	-inf	inf	True	
-tougaard_extend	0	-inf	inf	False	
 example_amplitude	100	0	inf	True	
 example_sigma	0.2	0	inf	True	
 example_gamma	0.02	-inf	inf	True	
 example_gaussian_sigma	0.2	0	inf	True	
-example_center	100	0	inf	True	
-					
-					
-					
-					
-					
-					
+example_center	250	0	inf	True	
 example_alpha_3_amplitude	8	0	inf	False	example_amplitude*0.08
 example_alpha_3_sigma	0.2	0	inf	False	example_sigma
 example_alpha_3_gamma	0.02	-inf	inf	False	example_gamma
