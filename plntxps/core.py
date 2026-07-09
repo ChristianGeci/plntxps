@@ -1,6 +1,3 @@
-print("data processed with plnt_xps version 0.1.1")
-print("our crew is replaceable, your package isn't!")
-
 # Processing Laborsaving iNterpolative Tools for XPS
 
 import numpy as np
@@ -15,6 +12,8 @@ from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
+
+from .xpsdb import xpsdb_txt
 
 @dataclass
 class DataFile:

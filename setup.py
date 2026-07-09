@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='plntxps',
@@ -8,7 +8,7 @@ setup(
     author='Christian Geci',
     author_email='christian.geci@maine.edu',
     license='MIT license',
-    packages=['plntxps'],
+    packages = find_packages(),
     install_requires=[
                       'numpy',
                       'scipy',
@@ -26,4 +26,7 @@ setup(
         #'Programming Language :: Python :: 3.4',
         #'Programming Language :: Python :: 3.5',
     ],
+    package_data={
+        "plntxps.resources": ["HandbookXPS.csv"],
+    },
 )
