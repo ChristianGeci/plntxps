@@ -15,7 +15,7 @@ from .charge_reference import ChargeReference
 from .fitting import *
 from .background_subtraction import shirley_background
 
-from .xpsdb import plot_peaks
+from .xpsdb import plot_core_peaks
 
 @dataclass
 class DataFile:
