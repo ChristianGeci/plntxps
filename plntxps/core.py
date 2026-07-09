@@ -13,7 +13,7 @@ from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
 
-from .xpsdb import xpsdb_txt
+from .xpsdb import plot_peaks
 
 @dataclass
 class DataFile:
