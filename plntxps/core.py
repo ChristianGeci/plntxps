@@ -1,6 +1,3 @@
-print("data processed with plnt_xps version 0.1.1")
-print("our crew is replaceable, your package isn't!")
-
 # Processing Laborsaving iNterpolative Tools for XPS
 
 import numpy as np
@@ -17,6 +14,8 @@ from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
 from .fitting import *
 from .background_subtraction import shirley_background
+
+from .xpsdb import plot_peaks
 
 @dataclass
 class DataFile:
