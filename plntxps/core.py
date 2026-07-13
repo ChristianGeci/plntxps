@@ -15,12 +15,14 @@ from .charge_reference import ChargeReference
 from .fitting import *
 from .background_subtraction import shirley_background
 
-from .xpsdb import plot_peaks, get_core_peaks_around, get_auger_peaks_around
+from .xpsdb import (plot_peaks, get_core_peaks_around, get_auger_peaks_around,
+                   get_auger_df, get_photoemission_df)
 
 @dataclass
 class DataFile:
     spectra: list[Spectrum]
     operations: list[Operation]
+    name: str
     charge_reference = None
 
     @property
@@ -393,7 +395,7 @@ def check_data_block(line: str):
     except:
         return False
 
-def read_datafile(path: str) -> DataFile:
+def read_datafile(path: str, name: str = None) -> DataFile:
     with open(path, 'r') as f:
         text = f.read()
 
@@ -448,5 +450,5 @@ def read_datafile(path: str) -> DataFile:
                     print(f"Failed to read operation for Index {len(spectra) - 1}, {spectra[-1].name}: {e}")
             case _:
                 pass
-    return DataFile(spectra, operations)
+    return DataFile(spectra, operations, name=name)
 datafile = read_datafile # legacy compatibility
