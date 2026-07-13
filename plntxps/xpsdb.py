@@ -90,3 +90,9 @@ def get_auger_peaks_around(kinetic_energy, window_width = 30):
     mask = np.abs(auger_df["Kinetic Energy"] - kinetic_energy) <= window_width
     result = auger_df[mask].sort_values(by = "Kinetic Energy")
     return result
+
+def get_photoemission_df():
+    return photoemission_df
+
+def get_auger_df():
+    return auger_df
