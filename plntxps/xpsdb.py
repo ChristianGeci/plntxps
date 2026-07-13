@@ -80,3 +80,13 @@ def simulate_node_repulsion(initial_positions, minimum_distance, granularity):
         position_snapshots.append(position_snapshots[-1] + velocities)
 
     return position_snapshots[-1]
+
+def get_core_peaks_around(binding_energy, window_width = 30):
+    mask = np.abs(photoemission_df["Binding Energy"] - binding_energy) <= window_width
+    result = photoemission_df[mask].sort_values(by = "Binding Energy")
+    return result
+
+def get_auger_peaks_around(kinetic_energy, window_width = 30):
+    mask = np.abs(auger_df["Kinetic Energy"] - kinetic_energy) <= window_width
+    result = auger_df[mask].sort_values(by = "Kinetic Energy")
+    return result
