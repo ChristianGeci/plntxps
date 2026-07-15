@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from .read_utils import (get_data, get_time, is_peak_location,
     get_region, get_comment, get_operation_name, get_center, get_scan_number,
-    get_channel_number)
+    get_channel_number, get_info)
 from .peak_location import PeakLocation
 
 @dataclass
@@ -28,6 +28,25 @@ def read_scan(header, data):
     return Scan(counts, eV, scan_number, channel_number, time)
 
 @dataclass
+class SpectrumInfo:
+    comment: str
+    analyzer_lens: str
+    pass_energy: int
+    excitation_energy: float
+
+def get_spectrum_info(header):
+    comment = get_comment(header)
+    analyzer_lens = get_info(header, "Analyzer Lens")
+    pass_energy = int(get_info(header, "Pass Energy"))
+    excitation_energy = float(get_info(header, "Excitation Energy"))
+    return SpectrumInfo(
+        comment,
+        analyzer_lens,
+        pass_energy,
+        excitation_energy,
+        )
+
+@dataclass
 class Spectrum:
     "Contains an XPS spectrum"
     scans: list[Scan]
@@ -42,6 +61,7 @@ class Spectrum:
     "Operations (e.g. peak area, multi-peak fit) which reference this spectrum"
     charge_correction: float = None
     "Shift applied to binding energy to account for charging effects"
+    info: SpectrumInfo = None
     def plot(self, ax = plt, **kwargs):
         ax.plot(self.eV, self.counts, **kwargs)
 
@@ -57,7 +77,6 @@ class Spectrum:
     @counts.setter
     def counts(self, value):
         self._counts = value
-
 
     @property
     def eV_corrected(self) -> np.ndarray:
@@ -104,7 +123,8 @@ def read_spectrum(header: str, data: str) -> Spectrum:
     name = get_region(header)
     comment = get_comment(header)
     scans = [read_scan(header, data)]
-    return Spectrum(scans, eV, name, comment, time, [])
+    info = get_spectrum_info(header)
+    return Spectrum(scans, eV, name, comment, time, [], info = info)
 
 @dataclass 
 class Operation:

@@ -53,6 +53,13 @@ def get_comment(entry):
     comment = re.sub(r'#\s*', ' '*35, comment) # todo: get rid of magic number
     return comment.strip()
 
+def get_info(entry: str, field: str):
+    pattern = r"# " + field + r":.*\n"
+    unwanted_part = r"# " + field + r":\s*"
+    id_line = re.search(pattern, entry).group()
+    id = re.sub(unwanted_part, "", id_line)
+    return id.strip()
+
 def get_id(entry):
     pattern = r"# Spectrum ID:.*\n"
     id_line = re.search(pattern, entry).group()

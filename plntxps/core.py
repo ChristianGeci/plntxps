@@ -5,6 +5,7 @@ import scipy as sp
 import re
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+import pandas as pd
 
 from .spectrum import read_spectrum, Spectrum, read_operation, Operation, read_scan, Scan
 from .read_utils import EntryType, get_entry_type
@@ -15,7 +16,7 @@ from .charge_reference import ChargeReference
 from .fitting import *
 from .background_subtraction import shirley_background
 
-from .xpsdb import plot_core_peaks
+from .xpsdb import plot_core_peaks, get_core_peaks_around
 
 @dataclass
 class DataFile:
@@ -30,6 +31,16 @@ class DataFile:
     @property
     def start_time(self):
         return self.spectra[0].time
+
+    @property
+    def spectrum_table(self):
+        table = pd.DataFrame()
+        table["Name"] = self.spectrum_names
+        table["Time (mine)"] = [spectrum.time for spectrum in self.spectra]
+        table["Comment"] = [spectrum.comment for spectrum in self.spectra]
+        table["Pass Energy"] = [spectrum.info.pass_energy for spectrum in self.spectra]
+        table["Lens Mode"] = [spectrum.info.analyzer_lens for spectrum in self.spectra]
+        return table
 
     def list_spectra(self):
         print(self.spectrum_list())

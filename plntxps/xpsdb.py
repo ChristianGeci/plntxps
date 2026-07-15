@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from importlib.resources import files
 from io import StringIO
+import copy
 
 data_path = files('plntxps.resources').joinpath('HandbookXPS.csv')
 
@@ -14,7 +15,7 @@ def get_positions_and_names(element, df):
     positions = (df[
         df['AtomicLevel.symbol'].apply(lambda x: x.lower()) == element.lower()]
         ['BindingEnergy']
-        .apply(lambda x : float(re.sub(r'[^0-9.]', '', x)))
+        .apply(lambda x: float(re.sub(r'[^0-9.]', '', x)))
         .tolist())
     levels = (df[
         df['AtomicLevel.symbol'].apply(lambda x: x.lower()) == element.lower()]
@@ -22,8 +23,19 @@ def get_positions_and_names(element, df):
         .apply(lambda x: f"{element} {x}")).tolist()
     return positions, levels
 
+def get_core_peaks_around(binding_energy, window = 10):
+    df = copy.copy(photoemission_df[
+        np.abs((photoemission_df["BindingEnergy"].apply(lambda x: float(re.sub(r'[^0-9.]', '', x))) - binding_energy)) <= window
+    ])
+    numeric_binding_energies = []
+    for index, row in df.iterrows():
+        numeric_binding_energies.append(float(re.sub(r'[^0-9.]', '', row["BindingEnergy"])))
+    df["eV"] = numeric_binding_energies
+    sorted_df = df.sort_values(by = "eV")
+    return sorted_df
+
 def plot_core_peaks(element, vline_min, vline_max,
-        minimum_distance = 100,
+        minimum_distance = 10,
         **kwargs):
     positions, names = get_positions_and_names(element, photoemission_df)
     line = plt.vlines(positions, vline_min, vline_max, **kwargs)
