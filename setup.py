@@ -29,6 +29,9 @@ setup(
         #'Programming Language :: Python :: 3.5',
     ],
     package_data={
-        "plntxps.resources": ["HandbookXPS.csv"],
+        "plntxps.resources": [
+            "HandbookXPS_formatted.csv",
+            "HandbookAES_formatted.csv",
+            ],
     },
 )

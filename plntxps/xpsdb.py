@@ -6,38 +6,48 @@ from importlib.resources import files
 from io import StringIO
 import copy
 
-data_path = files('plntxps.resources').joinpath('HandbookXPS.csv')
+photoemission_path = files('plntxps.resources').joinpath('HandbookXPS_formatted.csv')
+auger_path = files('plntxps.resources').joinpath('HandbookAES_formatted.csv')
 
-photoemission_csv = data_path.read_text(encoding='utf-8')
-photoemission_df = pd.read_csv(StringIO(photoemission_csv), sep = ";")
+photoemission_csv = photoemission_path.read_text(encoding='utf-8')
+auger_csv = auger_path.read_text(encoding='utf-8')
 
-def get_positions_and_names(element, df):
-    positions = (df[
-        df['AtomicLevel.symbol'].apply(lambda x: x.lower()) == element.lower()]
-        ['BindingEnergy']
-        .apply(lambda x: float(re.sub(r'[^0-9.]', '', x)))
-        .tolist())
-    levels = (df[
-        df['AtomicLevel.symbol'].apply(lambda x: x.lower()) == element.lower()]
-        ['AtomicLevel.level']
-        .apply(lambda x: f"{element} {x}")).tolist()
+photoemission_df = pd.read_csv(StringIO(photoemission_csv), sep = "\t")
+auger_df = pd.read_csv(StringIO(auger_csv), sep = "\t")
+
+def kinetic_to_binding(kinetic_energy,
+        photon_energy, work_function):
+    return photon_energy - work_function - kinetic_energy
+
+def get_auger_positions_and_names(element, photon_energy, work_function, df = auger_df):
+    filtered_df = df[
+        df['Element'].apply(lambda x: x.lower()) == element.lower()]
+    positions = [float(item) for item in filtered_df["Kinetic Energy"].tolist()]
+    positions  = list(kinetic_to_binding(np.array(positions),
+        photon_energy, work_function))
+    levels = (filtered_df['Level']
+        .apply(lambda level: f"{element} {level}")).tolist()
     return positions, levels
 
-def get_core_peaks_around(binding_energy, window = 10):
-    df = copy.copy(photoemission_df[
-        np.abs((photoemission_df["BindingEnergy"].apply(lambda x: float(re.sub(r'[^0-9.]', '', x))) - binding_energy)) <= window
-    ])
-    numeric_binding_energies = []
-    for index, row in df.iterrows():
-        numeric_binding_energies.append(float(re.sub(r'[^0-9.]', '', row["BindingEnergy"])))
-    df["eV"] = numeric_binding_energies
-    sorted_df = df.sort_values(by = "eV")
-    return sorted_df
+def get_core_positions_and_names(element, df = photoemission_df):
+    filtered_df = df[
+        df['Element'].apply(lambda x: x.lower()) == element.lower()]
+    positions = [float(item) for item in filtered_df["Binding Energy"].tolist()]
+    levels = (filtered_df['Level']
+        .apply(lambda level: f"{element} {level}")).tolist()
+    return positions, levels
 
-def plot_core_peaks(element, vline_min, vline_max,
-        minimum_distance = 10,
+def plot_peaks(element, vline_min, vline_max,
+        photon_energy = 1253.6, work_function = 4.454,
+        minimum_distance = 100,
         **kwargs):
-    positions, names = get_positions_and_names(element, photoemission_df)
+    core_positions, core_names = get_core_positions_and_names(element)
+    auger_positions, auger_names = get_auger_positions_and_names(element,
+        photon_energy, work_function)
+
+    positions = core_positions + auger_positions
+    names = core_names + auger_names
+
     line = plt.vlines(positions, vline_min, vline_max, **kwargs)
     adjusted_positions = simulate_node_repulsion(
         positions, minimum_distance, minimum_distance/10)
@@ -71,3 +81,19 @@ def simulate_node_repulsion(initial_positions, minimum_distance, granularity):
         position_snapshots.append(position_snapshots[-1] + velocities)
 
     return position_snapshots[-1]
+
+def get_core_peaks_around(binding_energy, window_width = 30):
+    mask = np.abs(photoemission_df["Binding Energy"] - binding_energy) <= window_width
+    result = photoemission_df[mask].sort_values(by = "Binding Energy")
+    return result
+
+def get_auger_peaks_around(kinetic_energy, window_width = 30):
+    mask = np.abs(auger_df["Kinetic Energy"] - kinetic_energy) <= window_width
+    result = auger_df[mask].sort_values(by = "Kinetic Energy")
+    return result
+
+def get_photoemission_df():
+    return photoemission_df
+
+def get_auger_df():
+    return auger_df
