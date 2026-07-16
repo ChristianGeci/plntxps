@@ -33,17 +33,21 @@ class SpectrumInfo:
     analyzer_lens: str
     pass_energy: int
     excitation_energy: float
+    analyzer_slit: float
+    
 
 def get_spectrum_info(header):
     comment = get_comment(header)
     analyzer_lens = get_info(header, "Analyzer Lens")
     pass_energy = int(get_info(header, "Pass Energy"))
     excitation_energy = float(get_info(header, "Excitation Energy"))
+    analyzer_slit = get_info(header, "Analyzer Slit")
     return SpectrumInfo(
         comment,
         analyzer_lens,
         pass_energy,
         excitation_energy,
+        analyzer_slit,
         )
 
 @dataclass
