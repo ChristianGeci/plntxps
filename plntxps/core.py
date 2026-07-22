@@ -38,7 +38,7 @@ class DataFile:
     def spectrum_table(self):
         table = pd.DataFrame()
         table["Name"] = self.spectrum_names
-        table["Time (mine)"] = [spectrum.time for spectrum in self.spectra]
+        table["Time (minute)"] = [spectrum.time for spectrum in self.spectra]
         table["Comment"] = [spectrum.comment for spectrum in self.spectra]
         table["Pass Energy"] = [spectrum.info.pass_energy for spectrum in self.spectra]
         table["Lens Mode"] = [spectrum.info.analyzer_lens for spectrum in self.spectra]
