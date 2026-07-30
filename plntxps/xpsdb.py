@@ -37,7 +37,7 @@ def get_core_positions_and_names(element, df = photoemission_df):
         .apply(lambda level: f"{element} {level}")).tolist()
     return positions, levels
 
-def plot_peaks(element, vline_min, vline_max,
+def old_plot_peaks(element, vline_min, vline_max,
         photon_energy = 1253.6, work_function = 4.454,
         minimum_distance = 100,
         **kwargs):
@@ -53,6 +53,53 @@ def plot_peaks(element, vline_min, vline_max,
         positions, minimum_distance, minimum_distance/10)
     for position, name in zip(adjusted_positions, names):
         plt.annotate(name, (position, vline_max), rotation = 45, color = line.get_color())
+
+def max_within_range(eV, counts, position, _range):
+    tuples = [
+        (point_eV, point_count) for (point_eV, point_count) in tuple(zip(eV, counts))
+        if np.abs(point_eV - position) <= _range
+    ]
+    eV_slice, count_slice = tuple(zip(*tuples))
+    return np.max(count_slice)
+
+def plot_peaks(element, mpl_line, offset, height,
+        photon_energy = 1253.6, work_function = 4.454,
+        minimum_distance = 100, hover_range = 10,
+        include_names = True,
+        **kwargs):
+    core_positions, core_names = get_core_positions_and_names(element)
+    auger_positions, auger_names = get_auger_positions_and_names(element,
+        photon_energy, work_function)
+
+    positions = core_positions + auger_positions
+    names = core_names + auger_names
+
+    # filter out lines outside the spectrum
+    positions, names = tuple(zip(*[
+        (position, name) for (position, name) in zip(positions, names)
+        if  position >= min(mpl_line.get_data()[0])
+        and position <= max(mpl_line.get_data()[0])
+    ]))
+    
+    # plot ticmarks above the trace of the spectrum
+    vline_mins = []
+    for x_position in positions:
+        vline_mins.append(max_within_range(
+            eV = mpl_line.get_data()[0],
+            counts = mpl_line.get_data()[1],
+            position = x_position,
+            _range = hover_range,
+        ))
+    vline_mins = np.array(vline_mins) + offset
+    vline_maxs = vline_mins + height
+
+    line = plt.vlines(positions, vline_mins, vline_maxs, **kwargs)
+    if not include_names:
+        return
+    adjusted_positions = simulate_node_repulsion(
+        positions, minimum_distance, minimum_distance/10)
+    for x_position, y_position, name in zip(adjusted_positions, vline_maxs, names):
+        plt.annotate(name, (x_position, y_position), rotation = 45, color = line.get_color())
 
 def simulate_node_repulsion(initial_positions, minimum_distance, granularity):
     def velocity_from_one_point(point_position, neighbor_position):
