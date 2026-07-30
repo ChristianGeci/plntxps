@@ -6,6 +6,7 @@ import lmfext
 from lmfitxps import models
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
+from .spectrum import Spectrum
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -175,3 +176,52 @@ def fit_procedure(eV, counts, peaks, params_path, guess_shirley = False,
     if plot_result:
         plot_fit_result(eV, counts, result, satellites)
     return result
+
+def parabola(x, center, height, curvature):
+    return curvature * (x - center)**2 + height
+def _parabolic_fit(spectrum_slice: Spectrum):
+    argmax = np.argmax(spectrum_slice.counts)
+    center = spectrum_slice.eV[argmax]
+    height = spectrum_slice.counts[argmax]
+
+    peak_model = lmfit.Model(parabola)
+    params = peak_model.make_params(
+        center = center, height = height, curvature = -1)
+
+    result = peak_model.fit(
+        spectrum_slice.counts,
+        params,
+        x = spectrum_slice.eV,
+    )
+    return result
+def parabolic_fit(
+        spectrum: Spectrum, slice_min: float, slice_max: float,
+        plot: bool):
+    spectrum_slice = spectrum.slice(slice_min, slice_max)
+    result = _parabolic_fit(spectrum_slice)
+    if plot:
+        spectrum.plot()
+        plt.plot(spectrum_slice.eV, result.best_fit, ls = 'dashed')
+        plt.vlines(
+            [slice_min, slice_max],
+            min(spectrum_slice.counts) / 1.1,
+            max(spectrum_slice.counts) * 1.05,
+            color = 'black', ls = 'dashed')
+    return result
+def fit_peak_position(
+        spectrum: Spectrum, slice_min: float, slice_max: float,
+        plot: bool = True) -> float:
+    """
+    Finds the position of a peak using a parabolic fit
+    
+    :param spectrum: Spectrum
+    :type spectrum: Spectrum
+    :param slice_min: Min of the slice that contains the peak
+    :type slice_min: float
+    :param slice_max: Max of the slice that contains the peak
+    :type slice_max: float
+    :param plot: Plot the result?
+    :type plot: bool
+    """
+    result = parabolic_fit(spectrum, slice_min, slice_max, plot)
+    return result.params['center'].value
