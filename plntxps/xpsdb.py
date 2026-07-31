@@ -5,6 +5,7 @@ import pandas as pd
 from importlib.resources import files
 from io import StringIO
 import copy
+from collections import Counter
 
 photoemission_path = files('plntxps.resources').joinpath('HandbookXPS_formatted.csv')
 auger_path = files('plntxps.resources').joinpath('HandbookAES_formatted.csv')
@@ -68,6 +69,50 @@ def max_within_range(eV, counts, position, _range):
     eV_slice, count_slice = tuple(zip(*tuples))
     return np.max(count_slice)
 
+def identify_doublets(peak_names):
+    base_name_lookup = {}
+    for name in peak_names:
+        base_name_lookup[name] = re.sub(r"\d/\d", "", name)
+    base_names = set(list(base_name_lookup.values()))
+    counts = Counter(list(base_name_lookup.values()))
+    doublets = []
+    for name in base_names:
+        if counts[name] > 1:
+            doublets.append(name)
+    return doublets
+
+def filter_doublets(
+        positions, names, doublet_coalescence_threshold):
+    doublets = identify_doublets(names)
+    coalesced_doublets = []
+    for doublet in doublets:
+        doublet_positions, doublet_names = tuple(zip(*[
+            (position, name) for (position, name) in zip(positions, names)
+            if doublet in name
+        ]))
+        if np.abs(doublet_positions[0] - doublet_positions[2]) <= doublet_coalescence_threshold:
+            coalesced_doublets.append(doublet)
+
+    filtered_positions, filtered_names = [], []
+    for position, name in zip(positions, names):
+        base_name = re.sub(r"\d/\d", "", name)
+        if base_name not in doublets:
+            filtered_positions.append(position)
+            filtered_names.append(name)
+            continue
+        is_center = base_name == name
+        if base_name in coalesced_doublets:
+            if is_center:
+                filtered_positions.append(position)
+                filtered_names.append(name)
+            continue
+        else:
+            if not is_center:
+                filtered_positions.append(position)
+                filtered_names.append(name)
+            continue
+    return np.array(filtered_positions), np.array(filtered_names)
+
 def plot_peaks(element, mpl_line, offset, height,
         photon_energy = PHOTON_ENERGY['Mg'], work_function = WORK_FUNCTION,
         minimum_distance = 100, hover_range = 3,
@@ -80,7 +125,10 @@ def plot_peaks(element, mpl_line, offset, height,
 
     positions = core_positions + auger_positions
     names = core_names + auger_names
-
+    positions, names = filter_doublets(
+        positions, names, doublet_coalescence_threshold)
+    positions += shift
+    
     # filter out lines outside the spectrum
     positions, names = tuple(zip(*[
         (position, name) for (position, name) in zip(positions, names)
