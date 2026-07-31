@@ -111,18 +111,18 @@ class Spectrum:
         result.counts = counts
         return result
 
-def new_spectrum(eV, counts):
+def new_spectrum(eV, counts, name = ""):
     scan = Scan(
         counts = counts,
         eV = eV,
-        scan_number = 0,
-        channel_number = 0,
+        scan_number = "Sum",
+        channel_number = "Sum",
         time = 0)
     return Spectrum(
         scans = [scan],
         eV = eV,
         time = 0,
-        name = "",
+        name = name,
         comment = "",
         child_operations = [],
     )
@@ -141,6 +141,7 @@ def read_spectrum(header: str, data: str) -> Spectrum:
     eV, counts = get_data(data) 
     time = get_time(header)
     name = get_info(header, "Region")
+    photon_energy = get_info(header, "Excitation Energy")
     comment = get_comment(header)
     scans = [read_scan(header, data)]
     info = get_spectrum_info(header)
