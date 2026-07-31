@@ -54,11 +54,9 @@ def get_comment(entry):
     return comment.strip()
 
 def get_info(entry: str, field: str):
-    pattern = r"# " + field + r":.*\n"
-    unwanted_part = r"# " + field + r":\s*"
-    id_line = re.search(pattern, entry).group()
-    id = re.sub(unwanted_part, "", id_line)
-    return id.strip()
+    pattern = r"# " + field + r":(.*)\n"
+    result = re.search(pattern, entry).group(1)
+    return result.strip()
 
 def get_id(entry):
     pattern = r"# Spectrum ID:.*\n"
