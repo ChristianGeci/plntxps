@@ -2,6 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import numpy as np
 import matplotlib.pyplot as plt
+from .xpsdb import WORK_FUNCTION
 
 from .read_utils import (get_data, get_time, is_peak_location,
     get_comment, get_center, get_scan_number,
@@ -88,6 +89,13 @@ class Spectrum:
     def eV_corrected(self) -> np.ndarray:
         "Charge corrected binding energy (in eV)"
         return self.eV + self.charge_correction
+
+    @property
+    def binding_energy(self):
+        return self.eV
+    @property
+    def kinetic_energy(self):
+        return self.photon_energy - self.binding_energy - WORK_FUNCTION
     
     def slice(self, slice_min: float, slice_max: float) -> Spectrum:
         """

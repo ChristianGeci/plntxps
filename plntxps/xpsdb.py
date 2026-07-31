@@ -19,6 +19,7 @@ PHOTON_ENERGY = {
     "Mg": 1253.6,
     "Al": 1486.6,
 }
+WORK_FUNCTION = 4.543
 
 def kinetic_to_binding(kinetic_energy,
         photon_energy, work_function):

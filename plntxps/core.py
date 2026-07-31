@@ -16,8 +16,9 @@ from .charge_reference import ChargeReference
 from .fitting import *
 from .background_subtraction import shirley_background
 
-from .xpsdb import (plot_peaks, get_core_peaks_around, get_auger_peaks_around,
-                   get_auger_df, get_photoemission_df, PHOTON_ENERGY)
+from .xpsdb import (
+    plot_peaks, get_core_peaks_around, get_auger_peaks_around,
+    get_auger_df, get_photoemission_df, PHOTON_ENERGY)
 
 @dataclass
 class DataFile:
