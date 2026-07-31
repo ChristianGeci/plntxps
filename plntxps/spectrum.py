@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from .read_utils import (get_data, get_time, is_peak_location,
-    get_region, get_comment, get_operation_name, get_center, get_scan_number,
+    get_comment, get_center, get_scan_number,
     get_channel_number, get_info)
 from .peak_location import PeakLocation
 
@@ -140,7 +140,7 @@ def read_spectrum(header: str, data: str) -> Spectrum:
     """
     eV, counts = get_data(data) 
     time = get_time(header)
-    name = get_region(header)
+    name = get_info(header, "Region")
     comment = get_comment(header)
     scans = [read_scan(header, data)]
     info = get_spectrum_info(header)
@@ -171,7 +171,7 @@ def read_operation(header: str, data: str, parent: Spectrum) -> Operation:
     """
     # todo: verify this works
     eV, counts = get_data(data)
-    name = get_operation_name(header)
+    name = get_info(header, "Operation")
     result = Operation(counts, eV, name, parent, parent.name)
     if is_peak_location(header):
         peak_location = get_center(header)

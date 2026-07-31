@@ -33,13 +33,6 @@ def get_time(entry): # in minutes
           + parsed_timestamp[2] / 60) 
     return time
 
-def get_region(entry):
-    pattern = r"# Region:.*\n"
-    region_line = re.search(pattern, entry).group()
-    unwanted_part = r"# Region:\s*"
-    region_name = re.sub(unwanted_part, "", region_line)
-    return region_name.strip()
-
 def get_comment(entry):
     pattern = r"# Comment:.*?Cycle: "
     comment_line = re.search(pattern, entry, re.S).group()
@@ -58,13 +51,6 @@ def get_info(entry: str, field: str):
     result = re.search(pattern, entry).group(1)
     return result.strip()
 
-def get_id(entry):
-    pattern = r"# Spectrum ID:.*\n"
-    id_line = re.search(pattern, entry).group()
-    unwanted_part = r"# Spectrum ID:\s*"
-    id = re.sub(unwanted_part, "", id_line)
-    return id.strip()
-
 def get_entry_type(entry):
     spectrum_pattern = r"# Region:.*\n"
     scan_pattern = r'# Acquisition Date:.*\n'
@@ -76,13 +62,6 @@ def get_entry_type(entry):
     if re.search(operation_pattern, entry) is not None:
         return EntryType.OPERATION
     
-def get_operation_name(entry):
-    pattern = r"# Operation:.*\n"
-    line = re.search(pattern, entry).group()
-    unwanted_part = r"# Operation:\s*"
-    name = re.sub(unwanted_part, "", line)
-    return name.strip()
-
 def get_center(entry):
     pattern = r'# Parameter: "Peak \(x\)".*\n'
     peak_center_line = re.search(pattern, entry).group()
