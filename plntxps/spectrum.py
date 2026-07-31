@@ -111,9 +111,15 @@ class Spectrum:
         result.counts = counts
         return result
 
-def spectrum(eV, counts):
+def new_spectrum(eV, counts):
+    scan = Scan(
+        counts = counts,
+        eV = eV,
+        scan_number = 0,
+        channel_number = 0,
+        time = 0)
     return Spectrum(
-        scans = [counts],
+        scans = [scan],
         eV = eV,
         time = 0,
         name = "",

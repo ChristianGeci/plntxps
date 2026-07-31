@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import pandas as pd
 
-from .spectrum import read_spectrum, Spectrum, read_operation, Operation, read_scan, Scan, spectrum
+from .spectrum import read_spectrum, Spectrum, read_operation, Operation, read_scan, Scan, new_spectrum
 from .read_utils import EntryType, get_entry_type
 from .charge_curve import ChargeCurve, charge_curve_from_tuples
 from .charge_curve_spline import ChargeCurveSpline
