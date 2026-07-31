@@ -237,7 +237,8 @@ class DataFile:
         # store the data
         self.charge_corrected_valence_band = new_spectrum(
             eV = eV_window, counts = shifted_valence_band_sum,
-            name = "charge corrected valence band")
+            name = "charge corrected valence band",
+            photon_energy = reference_spectrum.photon_energy)
         
         # plotting stuff
         if (not plot_result):

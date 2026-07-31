@@ -63,6 +63,8 @@ class Spectrum:
     "Timestamp of spectrum acquisition"
     child_operations: list[Operation]
     "Operations (e.g. peak area, multi-peak fit) which reference this spectrum"
+    photon_energy: float
+    "Photon Energy (in eV)"
     charge_correction: float = None
     "Shift applied to binding energy to account for charging effects"
     info: SpectrumInfo = None
@@ -106,12 +108,12 @@ class Spectrum:
         back_transposed_data = list(zip(*filtered_data))
         eV = np.array(back_transposed_data[0])
         counts = np.array(back_transposed_data[1])
-        result = Spectrum(scans = [], eV=eV, name=None, comment=None,
-                        time=None, child_operations=None, charge_correction=None)
+        result = new_spectrum(
+            eV = eV, counts = counts, photon_energy = self.photon_energy)
         result.counts = counts
         return result
 
-def new_spectrum(eV, counts, name = ""):
+def new_spectrum(eV, counts, photon_energy, name = ""):
     scan = Scan(
         counts = counts,
         eV = eV,
@@ -125,6 +127,7 @@ def new_spectrum(eV, counts, name = ""):
         name = name,
         comment = "",
         child_operations = [],
+        photon_energy = photon_energy,
     )
 
 def read_spectrum(header: str, data: str) -> Spectrum:
@@ -145,7 +148,10 @@ def read_spectrum(header: str, data: str) -> Spectrum:
     comment = get_comment(header)
     scans = [read_scan(header, data)]
     info = get_spectrum_info(header)
-    return Spectrum(scans, eV, name, comment, time, [], info = info)
+    return Spectrum(
+        scans = scans, eV = eV, name = name, comment = comment,
+        time = time, child_operations = [], info = info,
+        photon_energy = photon_energy)
 
 @dataclass 
 class Operation:
