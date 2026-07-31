@@ -15,6 +15,11 @@ auger_csv = auger_path.read_text(encoding='utf-8')
 photoemission_df = pd.read_csv(StringIO(photoemission_csv), sep = "\t")
 auger_df = pd.read_csv(StringIO(auger_csv), sep = "\t")
 
+PHOTON_ENERGY = {
+    "Mg": 1253.6,
+    "Al": 1486.6,
+}
+
 def kinetic_to_binding(kinetic_energy,
         photon_energy, work_function):
     return photon_energy - work_function - kinetic_energy
