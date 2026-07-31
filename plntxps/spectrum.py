@@ -111,6 +111,16 @@ class Spectrum:
         result.counts = counts
         return result
 
+def spectrum(eV, counts):
+    return Spectrum(
+        scans = [counts],
+        eV = eV,
+        time = 0,
+        name = "",
+        comment = "",
+        child_operations = [],
+    )
+
 def read_spectrum(header: str, data: str) -> Spectrum:
     """
     Get spectrum object from text data
