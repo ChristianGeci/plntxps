@@ -82,7 +82,8 @@ def identify_doublets(peak_names):
     return doublets
 
 def filter_doublets(
-        positions, names, doublets, doublet_coalescence_threshold):
+        positions, names, doublet_coalescence_threshold):
+    doublets = identify_doublets(names)
     coalesced_doublets = []
     for doublet in doublets:
         doublet_positions, doublet_names = tuple(zip(*[
@@ -110,8 +111,7 @@ def filter_doublets(
                 filtered_positions.append(position)
                 filtered_names.append(name)
             continue
-    return filtered_positions, filtered_names
-
+    return np.array(filtered_positions), np.array(filtered_names)
 
 def plot_peaks(element, mpl_line, offset, height,
         photon_energy = PHOTON_ENERGY['Mg'], work_function = WORK_FUNCTION,
@@ -125,8 +125,9 @@ def plot_peaks(element, mpl_line, offset, height,
 
     positions = core_positions + auger_positions
     names = core_names + auger_names
-    doublets = identify_doublets(names)
-    positions, names = filter_doublets(positions, names, doublets, doublet_coalescence_threshold)
+    positions, names = filter_doublets(
+        positions, names, doublet_coalescence_threshold)
+    positions += shift
     
     # filter out lines outside the spectrum
     positions, names = tuple(zip(*[
