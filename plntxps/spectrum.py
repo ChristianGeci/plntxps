@@ -70,7 +70,7 @@ class Spectrum:
     "Shift applied to binding energy to account for charging effects"
     info: SpectrumInfo = None
     def plot(self, ax = plt, **kwargs):
-        ax.plot(self.eV, self.counts, **kwargs)
+        return ax.plot(self.eV, self.counts, **kwargs)
 
     def masked_counts(self, channel_mask = [], scan_mask = []):
         return np.sum([scan.counts for scan in self.scans

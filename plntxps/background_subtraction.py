@@ -1,7 +1,6 @@
 import numpy as np
 
-def iterate_shirley_background(counts):
-    shirley_parameter = np.mean(counts[:10])
+def iterate_shirley_background(counts, shirley_parameter):
     sum_counts = np.sum(counts)
     sum_past_point = []
     for n in range(0, len(counts)):
@@ -9,13 +8,28 @@ def iterate_shirley_background(counts):
     sum_past_point = np.array(sum_past_point)
     return counts - shirley_parameter*sum_past_point/sum_counts
 
-def shirley_background_subtraction(counts, n_iterations):
-    flat_background = np.mean(counts[-10:])
+def shirley_background_subtraction(counts, flat_background, n_iterations):
     results = [counts - flat_background]
     for n in range(0, n_iterations):
-        results.append(iterate_shirley_background(results[-1]))
+        counts = results[-1]
+        shirley_parameter = np.mean(counts[:10])
+        results.append(iterate_shirley_background(counts, shirley_parameter))
     return results
 
 def shirley_background(counts, n_iterations):
-    corrected_counts = shirley_background_subtraction(counts, n_iterations)
+    flat_background = np.mean(counts[-10:])
+    corrected_counts = shirley_background_subtraction(counts, flat_background, n_iterations)
     return [counts - corrected for corrected in corrected_counts]
+
+def parameteric_shirley_background_subtraction(counts, flat_background, shirley_parameter, n_iterations):
+    results = [counts - flat_background]
+    for n in range(0, n_iterations):
+        counts = results[-1]
+        results.append(iterate_shirley_background(counts, shirley_parameter))
+    return results
+
+def parametric_shirley_background(y, flat_background, shirley_parameter):
+    corrected_counts = parameteric_shirley_background_subtraction(
+        y, flat_background, shirley_parameter, 5
+    )
+    return y - corrected_counts[-1]

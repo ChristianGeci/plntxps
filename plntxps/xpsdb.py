@@ -69,9 +69,10 @@ def max_within_range(eV, counts, position, _range):
     return np.max(count_slice)
 
 def plot_peaks(element, mpl_line, offset, height,
-        photon_energy = 1253.6, work_function = 4.454,
-        minimum_distance = 100, hover_range = 10,
-        include_names = True,
+        photon_energy = PHOTON_ENERGY['Mg'], work_function = WORK_FUNCTION,
+        minimum_distance = 100, hover_range = 3,
+        include_names = True, shift = 0,
+        doublet_coalescence_threshold = 1,
         **kwargs):
     core_positions, core_names = get_core_positions_and_names(element)
     auger_positions, auger_names = get_auger_positions_and_names(element,
