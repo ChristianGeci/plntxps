@@ -235,11 +235,9 @@ class DataFile:
         shifted_valence_band_sum = np.array(shifted_valence_band_sum)
         
         # store the data
-        self.charge_corrected_valence_band = Spectrum(
-            scans = [], eV = eV_window, 
-            time = None, child_operations = None, comment = None,
+        self.charge_corrected_valence_band = new_spectrum(
+            eV = eV_window, counts = shifted_valence_band_sum,
             name = "charge corrected valence band")
-        self.charge_corrected_valence_band.counts = shifted_valence_band_sum
         
         # plotting stuff
         if (not plot_result):
