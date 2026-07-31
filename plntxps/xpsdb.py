@@ -5,6 +5,7 @@ import pandas as pd
 from importlib.resources import files
 from io import StringIO
 import copy
+from collections import Counter
 
 photoemission_path = files('plntxps.resources').joinpath('HandbookXPS_formatted.csv')
 auger_path = files('plntxps.resources').joinpath('HandbookAES_formatted.csv')
@@ -68,10 +69,23 @@ def max_within_range(eV, counts, position, _range):
     eV_slice, count_slice = tuple(zip(*tuples))
     return np.max(count_slice)
 
+def identify_doublets(peak_names):
+    base_name_lookup = {}
+    for name in peak_names:
+        base_name_lookup[name] = re.sub(r"\d/\d", "", name)
+    base_names = set(list(base_name_lookup.values()))
+    counts = Counter(list(base_name_lookup.values()))
+    doublets = []
+    for name in base_names:
+        if counts[name] > 1:
+            doublets.append(name)
+    return doublets
+
 def plot_peaks(element, mpl_line, offset, height,
-        photon_energy = 1253.6, work_function = 4.454,
+        photon_energy = PHOTON_ENERGY['Mg'], work_function = WORK_FUNCTION,
         minimum_distance = 100, hover_range = 10,
-        include_names = True,
+        include_names = True, shift = 0,
+        doublet_coalescence_threshold = 1,
         **kwargs):
     core_positions, core_names = get_core_positions_and_names(element)
     auger_positions, auger_names = get_auger_positions_and_names(element,
@@ -79,6 +93,7 @@ def plot_peaks(element, mpl_line, offset, height,
 
     positions = core_positions + auger_positions
     names = core_names + auger_names
+    print(identify_doublets(names)) # debug
 
     # filter out lines outside the spectrum
     positions, names = tuple(zip(*[
