@@ -8,6 +8,7 @@ from .read_utils import (get_data, get_time, is_peak_location,
     get_comment, get_center, get_scan_number,
     get_channel_number, get_info)
 from .peak_location import PeakLocation
+from .resolution import calculate_resolution
 
 @dataclass
 class Scan:
@@ -35,7 +36,7 @@ class SpectrumInfo:
     pass_energy: int
     excitation_energy: float
     analyzer_slit: float
-    
+    resolution: float
 
 def get_spectrum_info(header):
     comment = get_comment(header)
@@ -43,12 +44,18 @@ def get_spectrum_info(header):
     pass_energy = int(get_info(header, "Pass Energy"))
     excitation_energy = float(get_info(header, "Excitation Energy"))
     analyzer_slit = get_info(header, "Analyzer Slit")
+    resolution = calculate_resolution(
+        pass_energy,
+        analyzer_lens,
+        analyzer_slit,
+    )
     return SpectrumInfo(
         comment,
         analyzer_lens,
         pass_energy,
         excitation_energy,
         analyzer_slit,
+        resolution,
         )
 
 @dataclass
