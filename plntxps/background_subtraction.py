@@ -33,3 +33,15 @@ def parametric_shirley_background(y, flat_background, step_height):
         y, flat_background, step_height, 5
     )
     return y - corrected_counts[-1]
+
+def parametric_shirley_background_with_cutoff(
+        x, y, flat_background, step_height, x_cutoff):
+    x_sliced, y_sliced = tuple(zip(*[
+        (x_val, y_val) for (x_val, y_val) in zip(x, y)
+        if x_val <= x_cutoff
+    ]))
+    sliced_background = list(parametric_shirley_background(
+        np.array(y_sliced), flat_background, step_height))
+    padding = [flat_background + step_height] * (len(y) - len(sliced_background))
+    result = padding + sliced_background
+    return np.array(result)

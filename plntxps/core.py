@@ -14,7 +14,7 @@ from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
 from .fitting import *
-from .background_subtraction import shirley_background, parametric_shirley_background
+from .background_subtraction import shirley_background, parametric_shirley_background, parametric_shirley_background_with_cutoff
 
 from .xpsdb import (
     plot_peaks, get_core_peaks_around, get_auger_peaks_around,
