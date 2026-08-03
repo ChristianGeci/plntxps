@@ -7,7 +7,7 @@ from lmfitxps import models
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from .spectrum import Spectrum
-from .background_subtraction import parametric_shirley_background
+from .background_subtraction import parametric_shirley_background, parametric_shirley_background_with_cutoff
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -15,7 +15,8 @@ def boilerplate():
     plt.ylabel("Counts per Second")
 
 def auto_shirley(params, counts):
-    params['shirley_const'].value = np.min(counts)
+    params['shirley_flat_background'].value = np.min(counts)
+    params['shirley_step_height'].value = counts[0] - np.min(counts)
 
 def set_satellite_param_hints(model, parent_prefix, satellite):
     model.set_param_hint(
@@ -37,16 +38,24 @@ def setup_satellite_models(peaks, satellites):
             fit_models.append(satellite_model)
     return fit_models
 
-def setup_model(peaks, bg_type, satellites):
-    fit_models = []
+def setup_background(bg_type):
     if bg_type == "shirley":
-        fit_models.append(lmfit.Model(parametric_shirley_background, prefix = "shirley_"))
+        return lmfit.Model(
+            parametric_shirley_background_with_cutoff,
+            prefix = "shirley_",
+            independent_vars = ['x', 'y'])
     elif bg_type == "tougaard":
-        fit_models.append(models.TougaardBG(independent_vars = ["x", "y"], prefix = 'tougaard_'))
+        return models.TougaardBG(independent_vars = ["x", "y"], prefix = 'tougaard_')
     elif bg_type == "none":
-        pass
+        return None
     else:
         raise ValueError("Background type not recognized")
+
+def setup_model(peaks, bg_type, satellites):
+    fit_models = []
+    background = setup_background(bg_type)
+    if background:
+        fit_models.append(background)
     for peak in peaks:
         fit_models.append(models.ConvGaussianDoniachSinglett(
             prefix = peak + '_', independent_vars = ["x"]))
