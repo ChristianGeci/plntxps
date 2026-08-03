@@ -32,6 +32,8 @@ setup(
         "plntxps.resources": [
             "HandbookXPS_formatted.csv",
             "HandbookAES_formatted.csv",
+            "perkin elmer al satellites.csv",
+            "perkin elmer mg satellites.csv",
             ],
     },
 )
