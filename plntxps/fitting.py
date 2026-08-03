@@ -17,17 +17,6 @@ def boilerplate():
 def auto_shirley(params, counts):
     params['shirley_const'].value = np.min(counts)
 
-def read_satellite_peaks(path):
-    satellites = pd.read_csv(path,
-        sep = '\t').to_dict(orient='index')
-    def format_satellite_name(name):
-        formatted_name = re.sub(r" ", "_", name)
-        formatted_name = re.sub(r",", "", formatted_name)
-        return formatted_name
-    for satellite in satellites.values():
-        satellite['name'] = format_satellite_name(satellite['name'])
-    return satellites
-
 def set_satellite_param_hints(model, parent_prefix, satellite):
     model.set_param_hint(
         'amplitude', expr = f"{parent_prefix}_amplitude*{satellite['intensity']/100}")

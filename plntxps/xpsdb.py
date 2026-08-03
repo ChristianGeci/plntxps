@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from importlib.resources import files
 from io import StringIO
-import copy
 from collections import Counter
-from .fitting import read_satellite_peaks
+from .satellites import read_satellite_peaks
 
 photoemission_path = files('plntxps.resources').joinpath('HandbookXPS_formatted.csv')
 auger_path = files('plntxps.resources').joinpath('HandbookAES_formatted.csv')
