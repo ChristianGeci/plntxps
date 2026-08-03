@@ -108,6 +108,8 @@ def group_components(components, satellites):
             component_table[curve_name] = [curve_name]
     # get satellites
     for parent_curve in list(component_table.keys()):
+        if "shirley" in parent_curve or "tougaard" in parent_curve:
+            continue
         for n in range(1, len(satellites)):
             component_table[parent_curve].append(
                 f"{parent_curve}{satellites[n]['name']}_")
