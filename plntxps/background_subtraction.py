@@ -25,7 +25,7 @@ def parametric_shirley_background_subtraction(counts, flat_background, step_heig
     results = [counts - flat_background]
     for n in range(0, n_iterations):
         counts = results[-1]
-        results.append(iterate_shirley_background(counts, step_height))
+        results.append(iterate_shirley_background(counts, step_height/n_iterations))
     return results
 
 def parametric_shirley_background(y, flat_background, step_height):
