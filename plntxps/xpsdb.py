@@ -130,11 +130,14 @@ def plot_peaks(element, mpl_line, offset, height,
     positions += shift
     
     # filter out lines outside the spectrum
-    positions, names = tuple(zip(*[
-        (position, name) for (position, name) in zip(positions, names)
-        if  position >= min(mpl_line.get_data()[0])
-        and position <= max(mpl_line.get_data()[0])
-    ]))
+    try:
+        positions, names = tuple(zip(*[
+            (position, name) for (position, name) in zip(positions, names)
+            if  position >= min(mpl_line.get_data()[0])
+            and position <= max(mpl_line.get_data()[0])
+        ]))
+    except ValueError:
+        return
     
     # plot ticmarks above the trace of the spectrum
     vline_mins = []
