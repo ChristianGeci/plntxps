@@ -6,6 +6,7 @@ from importlib.resources import files
 from io import StringIO
 import copy
 from collections import Counter
+from .fitting import read_satellite_peaks
 
 photoemission_path = files('plntxps.resources').joinpath('HandbookXPS_formatted.csv')
 auger_path = files('plntxps.resources').joinpath('HandbookAES_formatted.csv')
@@ -21,6 +22,11 @@ PHOTON_ENERGY = {
     "Al": 1486.6,
 }
 WORK_FUNCTION = 4.543
+
+def get_satellites(source: str):
+    path = files('plntxps.resources').joinpath(f'perkin elmer {source.lower()} satellites.csv')
+    csv_text = path.read_text(encoding='utf-8')
+    return read_satellite_peaks(StringIO(csv_text))
 
 def kinetic_to_binding(kinetic_energy,
         photon_energy, work_function):

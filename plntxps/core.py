@@ -18,7 +18,7 @@ from .background_subtraction import shirley_background, parametric_shirley_backg
 
 from .xpsdb import (
     plot_peaks, get_core_peaks_around, get_auger_peaks_around,
-    get_auger_df, get_photoemission_df, PHOTON_ENERGY)
+    get_auger_df, get_photoemission_df, PHOTON_ENERGY, get_satellites)
 
 @dataclass
 class DataFile:
