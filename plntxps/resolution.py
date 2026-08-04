@@ -1,4 +1,7 @@
-from numpy import pi
+from numpy import pi, sqrt, log
+
+MG_SOURCE_LINE_WIDTH = 0.7
+AL_SOURCE_LINE_WIDTH = 0.85
 
 ANGLE_LOOKUP_TABLE = {
     "LargeArea": 6,
@@ -53,8 +56,8 @@ def _calculate_resolution(
       * (total_slit_width / analyzer_radius + detection_angle**2)
     )
     return result
-
 def calculate_resolution(
+
         pass_energy: float,
         lens_mode: str,
         slits: str,
@@ -69,3 +72,10 @@ def calculate_resolution(
         detection_angle,
     )
     return result
+
+def calculate_gaussian_sigma(
+        analyzer_resolution: float,
+        source_line_width: float,
+        ):
+    line_width = sqrt(analyzer_resolution**2 + source_line_width**2)
+    return line_width/sqrt(8*log(2))
