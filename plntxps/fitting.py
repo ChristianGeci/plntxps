@@ -7,7 +7,7 @@ from lmfitxps import models
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from .spectrum import Spectrum
-from .background_subtraction import parametric_shirley_background, parametric_shirley_background_with_cutoff
+from .background_subtraction import parametric_shirley_background
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -41,9 +41,9 @@ def setup_satellite_models(peaks, satellites):
 def setup_background(bg_type):
     if bg_type == "shirley":
         return lmfit.Model(
-            parametric_shirley_background_with_cutoff,
+            parametric_shirley_background,
             prefix = "shirley_",
-            independent_vars = ['x', 'y'])
+            independent_vars = ['y'])
     elif bg_type == "tougaard":
         return models.TougaardBG(independent_vars = ["x", "y"], prefix = 'tougaard_')
     elif bg_type == "none":
@@ -103,7 +103,6 @@ def do_fit(eV, counts, fit_model, params_path, guess_shirley):
     result = fit_model.fit(counts, params,
         x = eV, y = counts)
     return result
-
 
 def group_components(components, satellites):
     component_table = {}
