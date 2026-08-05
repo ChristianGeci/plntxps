@@ -14,11 +14,14 @@ from .charge_curve_spline import ChargeCurveSpline
 from .plot_utils import autoscale_turned_off
 from .charge_reference import ChargeReference
 from .fitting import *
-from .background_subtraction import shirley_background, parametric_shirley_background, parametric_shirley_background_with_cutoff
+from .background_subtraction import shirley_background, parametric_shirley_background
+from .satellites import read_satellite_peaks
 
 from .xpsdb import (
     plot_peaks, get_core_peaks_around, get_auger_peaks_around,
     get_auger_df, get_photoemission_df, PHOTON_ENERGY, get_satellites)
+
+from .resolution import calculate_gaussian_sigma
 
 @dataclass
 class DataFile:
