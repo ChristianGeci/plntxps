@@ -225,3 +225,14 @@ def fit_peak_position(
     """
     result = parabolic_fit(spectrum, slice_min, slice_max, plot)
     return result.params['center'].value
+
+@dataclass
+class XpsBatchFit:
+    experiment_table: pd.DataFrame
+    region_table: pd.DataFrame
+    fit_table: pd.DataFrame
+    peak_tables: dict[str, pd.DataFrame]
+
+def xps_batch_fit(expermint_table_filepath, region_table_filepath):
+    experiment_table = pd.read_csv(expermint_table_filepath, sep = '\t')
+    region_table = pd.read_csv(region_table_filepath, sep = '\t')
