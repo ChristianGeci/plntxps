@@ -1,4 +1,5 @@
 import numpy as np
+from glob import glob
 import pandas as pd
 import re
 import lmfit
@@ -8,6 +9,7 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from .spectrum import Spectrum
 from .background_subtraction import parametric_shirley_background
+from .core import read_datafile
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -238,6 +240,22 @@ class XpsBatchFit:
     fit_table: pd.DataFrame
     peak_tables: dict[str, pd.DataFrame]
 
-def xps_batch_fit(expermint_table_filepath, region_table_filepath):
-    experiment_table = pd.read_csv(expermint_table_filepath, sep = '\t')
+def xps_batch_fit(experiment_table_filepath, region_table_filepath):
+    experiment_table = pd.read_csv(experiment_table_filepath, sep = '\t')
     region_table = pd.read_csv(region_table_filepath, sep = '\t')
+
+def make_blank_experiment_table(data_directory_path, experiment_table_path):
+    data_paths = glob(f"{data_directory_path}*.xy")
+    with open(experiment_table_path, 'w') as f:
+        f.write("filepath\tlabel\n")
+        for path in data_paths:
+            f.write(f"{path}\t\n")
+        f.close()
+    return
+def read_experiment_table(experiment_table_filepath):
+    result = pd.read_csv(experiment_table_filepath, sep = '\t')
+    datafiles = []
+    for index, row in result.iterrows():
+        datafiles.append(read_datafile(row['filepath']))
+    result['data'] = datafiles
+    return result
