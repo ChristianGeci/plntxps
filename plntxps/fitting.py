@@ -27,9 +27,18 @@ def set_satellite_param_hints(model, parent_prefix, satellite):
     model.set_param_hint('gamma', expr = f"{parent_prefix}_gamma")
     model.set_param_hint('gaussian_sigma', expr = f"{parent_prefix}_gaussian_sigma")
 
-def setup_satellite_models(peaks, satellites):
+def process_peak_name(peak_name):
+    result = peak_name
+    result = re.sub('/', '', result)
+    result = re.sub(' ', '_', result)
+    return result
+
+def setup_satellite_models(peak_table: pd.DataFrame, satellites):
     fit_models = []
-    for peak in peaks:
+    for index, row in peak_table.iterrows():
+        peak = process_peak_name(row['peak name'])
+        if not row['has satellites']:
+            continue
         for n in range(1, len(satellites)):
             satellite_model = models.ConvGaussianDoniachSinglett(
                 prefix = f"{peak}_{satellites[n]['name']}_",
@@ -51,18 +60,24 @@ def setup_background(bg_type):
     else:
         raise ValueError("Background type not recognized")
 
-def setup_model(peaks, bg_type, satellites):
+def setup_main_peaks(peak_table: pd.DataFrame):
+    result = []
+    for index, row in peak_table.iterrows():
+        peak = process_peak_name(row['peak name'])
+        result.append(models.ConvGaussianDoniachSinglett(
+            prefix = peak + '_', independent_vars = ["x"]))
+    return result
+
+def setup_fit_model(peak_table: pd.DataFrame, bg_type, satellites):
     fit_models = []
     background = setup_background(bg_type)
     if background:
         fit_models.append(background)
-    for peak in peaks:
-        fit_models.append(models.ConvGaussianDoniachSinglett(
-            prefix = peak + '_', independent_vars = ["x"]))
-
+    fit_models += setup_main_peaks(peak_table)
     if type(satellites) != type(None):
-        fit_models += setup_satellite_models(peaks, satellites)
+        fit_models += setup_satellite_models(peak_table, satellites)
 
+    # merge fit models
     fit_model = fit_models[0]
     if len(fit_models) > 1:
         for model in fit_models[1:]:
@@ -70,15 +85,11 @@ def setup_model(peaks, bg_type, satellites):
 
     return fit_model
 
-def setup_fit(eV, counts, peaks, params_path, satellites = None, 
-              plot_guess = True, bg_type = "tougaard",
-              guess_shirley = False):
-    fit_model = setup_model(peaks, bg_type, satellites)
-
+def setup_fit_params(peak_table: pd.DataFrame, params_path: str,
+              satellites = None, bg_type = "shirley"):
+    fit_model = setup_fit_model(peak_table, bg_type, satellites)
     lmfext.make_params_file(fit_model, params_path)
-    if plot_guess:
-        plot_initial_guess(fit_model, params_path, eV, counts, guess_shirley)
-    return fit_model
+    return 
 
 def plot_initial_guess(fit_model, params_path, eV, counts, guess_shirley):
     params = lmfext.read_params(params_path)
@@ -89,12 +100,11 @@ def plot_initial_guess(fit_model, params_path, eV, counts, guess_shirley):
         y = counts,
         x = eV,
     )
-    print("INITIAL GUESS:")
     plt.plot(eV, counts, color = 'black', label = 'data')
     plt.plot(eV, initial_guess, ls = 'dashed', label = 'model')
     boilerplate()
     plt.legend()
-    plt.show()
+    return initial_guess
 
 def do_fit(eV, counts, fit_model, params_path, guess_shirley):
     params = lmfext.read_params(params_path)
@@ -127,7 +137,7 @@ def group_components(components, satellites):
         result[parent_peak_name] = np.sum(curves, axis = 0)
     return result
 
-def plot_fit_result(eV, counts, fit_result, satellites, show = True, custom_background = None):
+def plot_fit_result(eV, counts, fit_result, satellites, custom_background = None):
     components = fit_result.eval_components(x = eV, y = counts)
     plt.plot(eV, counts, color = 'black', label = 'data')
     boilerplate()
@@ -162,19 +172,14 @@ def plot_fit_result(eV, counts, fit_result, satellites, show = True, custom_back
         plt.plot(eV, adjusted_curve, label = name[:-1], ls = 'dashed')
 
     plt.legend()
-    if show:
-        print("FIT RESULT:")
-        plt.show()
 
-def fit_procedure(eV, counts, peaks, params_path, guess_shirley = False,
-        plot_guess = False, plot_result = False, satellites = None,
-        bg_type = "tougaard"):
-    fit_model = setup_fit(eV, counts, peaks, params_path,
-        satellites = satellites, guess_shirley = guess_shirley,
-        plot_guess = plot_guess, bg_type = bg_type)
+def fit_procedure(
+        eV: np.ndarray[float], counts: np.ndarray[float],
+        peak_table: pd.DataFrame, params_path: str,
+        guess_shirley: bool = False, satellites = None,
+        bg_type = "shirley"):
+    fit_model = setup_fit_model(peak_table, bg_type, satellites)
     result = do_fit(eV, counts, fit_model, params_path, guess_shirley)
-    if plot_result:
-        plot_fit_result(eV, counts, result, satellites)
     return result
 
 def parabola(x, center, height, curvature):

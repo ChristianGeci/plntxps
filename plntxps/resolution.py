@@ -57,7 +57,6 @@ def _calculate_resolution(
     )
     return result
 def calculate_resolution(
-
         pass_energy: float,
         lens_mode: str,
         slits: str,
