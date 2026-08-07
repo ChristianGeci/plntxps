@@ -305,7 +305,8 @@ def make_empty_peak_tables(region_table, directory_path):
         "\thas satellites"
         "\tpeak shape"
     )
-    mkdir(directory_path)
+    try: mkdir(directory_path)
+    except FileExistsError: pass
     for region in region_table['region']:
         filepath = f"{directory_path}/{region}.csv"
         with open(filepath, 'w') as f:
