@@ -1,0 +1,6 @@
+region	params file	peaks file	slice	do fit	guess shirley	
+Mo spectrum				0	TRUE	FALSE
+Al spectrum				0	FALSE	FALSE
+Au spectrum				0	FALSE	FALSE
+Co spectrum				0	FALSE	FALSE
+Al low res spectrum				0	FALSE	FALSE
