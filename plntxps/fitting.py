@@ -276,6 +276,18 @@ def make_blank_region_table(filepath):
             )
         f.close()
     return
+def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
+    region_table = pd.read_csv(filepath, sep = '\t')
+    peak_paths = []
+    params_paths = []
+    for index, row in region_table.iterrows():
+        peak_path = f"{peaks_dir_path}/{row['region']}.csv"
+        params_path = f"{params_dir_path}/{row['region']}.csv"
+        peak_paths.append(peak_path)
+        params_paths.append(params_path)
+    region_table['params file'] = params_paths
+    region_table['peaks file'] = peak_paths
+    region_table.to_csv(filepath, sep = '\t', index = False)
 
 def make_empty_fit_table(experiment_table, region_table, filepath):
     # todo: prevent overwriting
