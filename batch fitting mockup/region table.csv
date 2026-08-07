@@ -3,4 +3,4 @@ Mo 3d	params/Mo 3d.csv	peaks/Mo 3d.csv	0	True	False
 Al 2p	params/Al 2p.csv	peaks/Al 2p.csv	0	False	False
 Au 4d	params/Au 4d.csv	peaks/Au 4d.csv	0	False	False
 Co 2p	params/Co 2p.csv	peaks/Co 2p.csv	0	False	False
-Al 2p low res	params/Al 2p low res.csv	peaks/Al 2p low res.csv	0	False	False
+Al 2p low res	params/Al 2p low res.csv	peaks/Al 2p.csv	0	False	False
