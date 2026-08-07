@@ -1,13 +1,13 @@
 label	Mo 3d	Al 2p	Au 4d	Co 2p	Al 2p low res	do fit
-Powder 3.0 12.0 450.0						
-Pellet 3.8 14.0 350.0						
-first powder						
-Powder 3.8 14.0 450.0						
-first commercial						
-Pellet 3.8 14.0 350.0 no Au						
-first pellet						
-Powder 3.0 12.0 350.0						
-Pellet 3.0 12.0 450.0						
-Powder 3.0 12.0 350.0 no Au						
-Al2O3						
-Pellet 3.8 14.0 450.0						
+first commercial						FALSE
+first pellet						FALSE
+first powder						FALSE
+Powder 3.0 12.0 450.0	12	13	15	8	9	TRUE
+Pellet 3.0 12.0 450.0	5	6	7	1	2	TRUE
+Powder 3.8 14.0 450.0	5	6	7	1	2	TRUE
+Al2O3		3	4		1	TRUE
+Pellet 3.8 14.0 450.0	5	6	7	1	2	TRUE
+Pellet 3.8 14.0 350.0 no Au	7	8	9	10	5	TRUE
+Pellet 3.8 14.0 350.0	14	15	16	10	12	TRUE
+Powder 3.0 12.0 350.0	5	6	7	1	3	TRUE
+Powder 3.0 12.0 350.0 no Au	5	6	7	1	3	TRUE
