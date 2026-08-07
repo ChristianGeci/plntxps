@@ -244,6 +244,15 @@ class XpsBatchFit:
     peak_tables: dict[str, pd.DataFrame]
     satellites: dict
 
+    def get_slice_bounds(self, region):
+        slice_bounds_string = (
+            self.region_table.query('region == @region')
+            ['slice'].item()
+        )
+        parsed_string = slice_bounds_string.split('-')
+        lower_bound = float(parsed_string[0])
+        upper_bound = float(parsed_string[1])
+        return lower_bound, upper_bound
     def get_spectrum(self, experiment, region):
         spectrum_index = (
             self.fit_table.query('label == @experiment')
@@ -255,7 +264,8 @@ class XpsBatchFit:
             self.experiment_table.query('label == @experiment')
             ['data'].item().spectra[int(spectrum_index)]
         )
-        return spectrum
+        slice_lower_bound, slice_upper_bound = self.get_slice_bounds(region)
+        return spectrum.slice(slice_lower_bound, slice_upper_bound)
     def get_params_path(self, region):
         params_path = (
             self.region_table.query('region == @region')
@@ -299,6 +309,7 @@ class XpsBatchFit:
         bg_type = self.get_bg_type(region)
         guess_shirley = self.get_guess_shirley(region)
         spectrum = self.get_spectrum(experiment, region)
+        print(f"resolution: {spectrum.info.resolution}")
         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
         plot_initial_guess(
             fit_model, params_path, spectrum.eV, spectrum.counts, guess_shirley)

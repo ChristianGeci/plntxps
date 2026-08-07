@@ -9,6 +9,7 @@ from .read_utils import (get_data, get_time, is_peak_location,
     get_channel_number, get_info)
 from .peak_location import PeakLocation
 from .resolution import calculate_resolution
+from copy import deepcopy
 
 @dataclass
 class Scan:
@@ -123,8 +124,8 @@ class Spectrum:
         back_transposed_data = list(zip(*filtered_data))
         eV = np.array(back_transposed_data[0])
         counts = np.array(back_transposed_data[1])
-        result = new_spectrum(
-            eV = eV, counts = counts, photon_energy = self.photon_energy)
+        result = deepcopy(self)
+        result.eV = eV
         result.counts = counts
         return result
 
