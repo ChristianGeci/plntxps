@@ -322,3 +322,11 @@ def read_peak_tables(region_table):
         peak_table = pd.read_csv(filepath, sep = '\t')
         result[region] = peak_table
     return result
+
+def make_params_files(region_table, peak_tables, satellites):
+    for index, row in region_table.iterrows():
+        region = row['region']
+        peak_table = peak_tables[region]
+        path = row['params file']
+        setup_fit_params(peak_table, path, satellites)
+    return
