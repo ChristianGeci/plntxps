@@ -313,3 +313,12 @@ def make_empty_peak_tables(region_table, directory_path):
             f.write(empty_table)
             f.close()
     return
+
+def read_peak_tables(region_table):
+    result = {}
+    for index, row in region_table.iterrows():
+        region = row['region']
+        filepath = row['peaks file']
+        peak_table = pd.read_csv(filepath, sep = '\t')
+        result[region] = peak_table
+    return result
