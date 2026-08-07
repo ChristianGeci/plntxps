@@ -61,7 +61,7 @@ def setup_background(bg_type):
     elif bg_type == "none":
         return None
     else:
-        raise ValueError("Background type not recognized")
+        raise ValueError(f"Background type not recognized: {bg_type}")
 
 def setup_main_peaks(peak_table: pd.DataFrame):
     result = []
@@ -240,6 +240,7 @@ class XpsBatchFit:
     region_table: pd.DataFrame
     fit_table: pd.DataFrame
     peak_tables: dict[str, pd.DataFrame]
+    satellites: dict
 
     def get_spectrum(self, experiment, region):
         spectrum_index = (
@@ -262,19 +263,27 @@ class XpsBatchFit:
             self.region_table.query('region == @region')
             ['guess shirley'].item()
         )
+        return result
+    def get_bg_type(self, region):
+        result = (
+            self.region_table.query('region == @region')
+            ['background type'].item()
+        )
+        return result
 
-    def check_guess(self, experiment, region, satellites):
+    def check_guess(self, experiment, region):
         peak_table = self.peak_tables[region]
         params_path = self.get_params_path(region)
         spectrum = self.get_spectrum(experiment, region)
-        fit_model = setup_fit_model(peak_table, "shirley", satellites) #fixme
+        bg_type = self.get_bg_type(region)
+        fit_model = setup_fit_model(peak_table, bg_type, self.satellites) #fixme
         guess_shirley = self.get_guess_shirley(region)
         plot_initial_guess(
             fit_model, params_path, spectrum.eV, spectrum.counts, guess_shirley)
         plt.show()
         fit = do_fit(
             spectrum.eV, spectrum.counts, fit_model, params_path, guess_shirley)
-        plot_fit_result(spectrum.eV, spectrum.counts, fit, satellites)
+        plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites)
         return fit
 
 def xps_batch_fit(experiment_table_filepath, region_table_filepath):
