@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from .spectrum import Spectrum
 from .background_subtraction import parametric_shirley_background
 from .core import read_datafile
+from os import mkdir
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -245,10 +246,12 @@ def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     region_table = pd.read_csv(region_table_filepath, sep = '\t')
 
 def make_blank_experiment_table(data_directory_path, experiment_table_path):
+    # todo: prevent overwriting
     data_paths = glob(f"{data_directory_path}*.xy")
     with open(experiment_table_path, 'w') as f:
         f.write("filepath\tlabel\n")
         for path in data_paths:
+            print(path) # debug
             f.write(f"{path}\t\n")
         f.close()
     return
@@ -259,3 +262,41 @@ def read_experiment_table(experiment_table_filepath):
         datafiles.append(read_datafile(row['filepath']))
     result['data'] = datafiles
     return result
+
+def make_blank_region_table(filepath):
+    # todo: prevent overwriting
+    with open(filepath, 'w') as f:
+        f.write(
+            'region'
+            '\tparams file'
+            '\tpeaks file'
+            '\tslice'
+            '\tdo fit'
+            '\tguess shirley'
+            )
+        f.close()
+    return
+
+def make_empty_fit_table(experiment_table, region_table, filepath):
+    # todo: prevent overwriting
+    fit_table = pd.DataFrame()
+    fit_table['label'] = experiment_table['label']
+    for region in region_table['region']:
+        fit_table[region] = None
+    fit_table['do fit'] = None
+    fit_table.to_csv(filepath, sep = '\t', index = False)
+    return
+
+def make_empty_peak_tables(region_table, directory_path):
+    empty_table = (
+        "peak name"
+        "\thas satellites"
+        "\tpeak shape"
+    )
+    mkdir(directory_path)
+    for region in region_table['region']:
+        filepath = f"{directory_path}/{region}.csv"
+        with open(filepath, 'w') as f:
+            f.write(empty_table)
+            f.close()
+    return
