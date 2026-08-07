@@ -257,13 +257,18 @@ class XpsBatchFit:
             ['params file'].item()
         )
         return params_path
+    def get_guess_shirley(self, region):
+        result = (
+            self.region_table.query('region == @region')
+            ['guess shirley'].item()
+        )
 
     def check_guess(self, experiment, region, satellites):
         peak_table = self.peak_tables[region]
         params_path = self.get_params_path(region)
         spectrum = self.get_spectrum(experiment, region)
         fit_model = setup_fit_model(peak_table, "shirley", satellites) #fixme
-        guess_shirley = True #fixme
+        guess_shirley = self.get_guess_shirley(region)
         plot_initial_guess(
             fit_model, params_path, spectrum.eV, spectrum.counts, guess_shirley)
         plt.show()
@@ -303,6 +308,7 @@ def make_blank_region_table(filepath):
             '\tpeaks file'
             '\tslice'
             '\tdo fit'
+            '\tbackground type'
             '\tguess shirley'
             )
         f.close()

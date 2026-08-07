@@ -1,87 +1,91 @@
 Parameter	value	min	max	vary	expr
-shirley_flat_background	-inf	-inf	inf	True	
-shirley_step_height	-inf	-inf	inf	True	
-Mo_3d_32_amplitude	100.0	0.0	inf	True	
-Mo_3d_32_sigma	0.2	0.0	inf	True	
-Mo_3d_32_gamma	0.02	-inf	inf	True	
-Mo_3d_32_gaussian_sigma	0.2	0.0	inf	True	
-Mo_3d_32_center	100.0	0.0	inf	True	
-Mo_3d_52_amplitude	100.0	0.0	inf	True	
-Mo_3d_52_sigma	0.2	0.0	inf	True	
-Mo_3d_52_gamma	0.02	-inf	inf	True	
-Mo_3d_52_gaussian_sigma	0.2	0.0	inf	True	
-Mo_3d_52_center	100.0	0.0	inf	True	
-Mo_3d_32_alpha_3_amplitude	6.4	0.0	inf	False	Mo_3d_32_amplitude*0.064
-Mo_3d_32_alpha_3_sigma	0.2	0.0	inf	False	Mo_3d_32_sigma
+shirley_flat_background	318	0	inf	True	
+shirley_step_height	15	0	inf	True	
+					
+Mo_3d_52_amplitude	350	0	inf	True	
+Mo_3d_52_sigma	0.7	0	inf	True	
+Mo_3d_52_gamma	0.02	0	inf	True	
+Mo_3d_52_gaussian_sigma	0.399370556906446	0	inf	False	
+Mo_3d_52_center	238	0	inf	True	
+					
+Mo_3d_32_amplitude					Mo_3d_52_amplitude*3.88/5.62
+Mo_3d_32_sigma					Mo_3d_52_sigma
+Mo_3d_32_gamma					Mo_3d_52_gamma
+Mo_3d_32_gaussian_sigma					Mo_3d_52_gaussian_sigma
+Mo_3d_32_center					Mo_3d_52_center + 3.1
+					
+					
+Mo_3d_32_alpha_3_amplitude	6.4	0	inf	False	Mo_3d_32_amplitude*0.064
+Mo_3d_32_alpha_3_sigma	0.2	0	inf	False	Mo_3d_32_sigma
 Mo_3d_32_alpha_3_gamma	0.02	-inf	inf	False	Mo_3d_32_gamma
-Mo_3d_32_alpha_3_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_32_gaussian_sigma
-Mo_3d_32_alpha_3_center	90.2	0.0	inf	False	Mo_3d_32_center-9.8
-Mo_3d_32_alpha_4_amplitude	3.2	0.0	inf	False	Mo_3d_32_amplitude*0.032
-Mo_3d_32_alpha_4_sigma	0.2	0.0	inf	False	Mo_3d_32_sigma
+Mo_3d_32_alpha_3_gaussian_sigma	0.2	0	inf	False	Mo_3d_32_gaussian_sigma
+Mo_3d_32_alpha_3_center	90.2	0	inf	False	Mo_3d_32_center-9.8
+Mo_3d_32_alpha_4_amplitude	3.2	0	inf	False	Mo_3d_32_amplitude*0.032
+Mo_3d_32_alpha_4_sigma	0.2	0	inf	False	Mo_3d_32_sigma
 Mo_3d_32_alpha_4_gamma	0.02	-inf	inf	False	Mo_3d_32_gamma
-Mo_3d_32_alpha_4_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_32_gaussian_sigma
-Mo_3d_32_alpha_4_center	88.2	0.0	inf	False	Mo_3d_32_center-11.8
-Mo_3d_32_alpha_5_amplitude	0.4	0.0	inf	False	Mo_3d_32_amplitude*0.004
-Mo_3d_32_alpha_5_sigma	0.2	0.0	inf	False	Mo_3d_32_sigma
+Mo_3d_32_alpha_4_gaussian_sigma	0.2	0	inf	False	Mo_3d_32_gaussian_sigma
+Mo_3d_32_alpha_4_center	88.2	0	inf	False	Mo_3d_32_center-11.8
+Mo_3d_32_alpha_5_amplitude	0.4	0	inf	False	Mo_3d_32_amplitude*0.004
+Mo_3d_32_alpha_5_sigma	0.2	0	inf	False	Mo_3d_32_sigma
 Mo_3d_32_alpha_5_gamma	0.02	-inf	inf	False	Mo_3d_32_gamma
-Mo_3d_32_alpha_5_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_32_gaussian_sigma
-Mo_3d_32_alpha_5_center	79.9	0.0	inf	False	Mo_3d_32_center-20.1
-Mo_3d_32_alpha_6_amplitude	0.3	0.0	inf	False	Mo_3d_32_amplitude*0.003
-Mo_3d_32_alpha_6_sigma	0.2	0.0	inf	False	Mo_3d_32_sigma
+Mo_3d_32_alpha_5_gaussian_sigma	0.2	0	inf	False	Mo_3d_32_gaussian_sigma
+Mo_3d_32_alpha_5_center	79.9	0	inf	False	Mo_3d_32_center-20.1
+Mo_3d_32_alpha_6_amplitude	0.3	0	inf	False	Mo_3d_32_amplitude*0.003
+Mo_3d_32_alpha_6_sigma	0.2	0	inf	False	Mo_3d_32_sigma
 Mo_3d_32_alpha_6_gamma	0.02	-inf	inf	False	Mo_3d_32_gamma
-Mo_3d_32_alpha_6_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_32_gaussian_sigma
-Mo_3d_32_alpha_6_center	76.6	0.0	inf	False	Mo_3d_32_center-23.4
-Mo_3d_32_beta_amplitude	0.6	0.0	inf	False	Mo_3d_32_amplitude*0.006
-Mo_3d_32_beta_sigma	0.2	0.0	inf	False	Mo_3d_32_sigma
+Mo_3d_32_alpha_6_gaussian_sigma	0.2	0	inf	False	Mo_3d_32_gaussian_sigma
+Mo_3d_32_alpha_6_center	76.6	0	inf	False	Mo_3d_32_center-23.4
+Mo_3d_32_beta_amplitude	0.6	0	inf	False	Mo_3d_32_amplitude*0.006
+Mo_3d_32_beta_sigma	0.2	0	inf	False	Mo_3d_32_sigma
 Mo_3d_32_beta_gamma	0.02	-inf	inf	False	Mo_3d_32_gamma
-Mo_3d_32_beta_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_32_gaussian_sigma
-Mo_3d_32_beta_center	30.299999999999997	0.0	inf	False	Mo_3d_32_center-69.7
-Mo_3d_52_alpha_3_amplitude	6.4	0.0	inf	False	Mo_3d_52_amplitude*0.064
-Mo_3d_52_alpha_3_sigma	0.2	0.0	inf	False	Mo_3d_52_sigma
+Mo_3d_32_beta_gaussian_sigma	0.2	0	inf	False	Mo_3d_32_gaussian_sigma
+Mo_3d_32_beta_center	30.3	0	inf	False	Mo_3d_32_center-69.7
+Mo_3d_52_alpha_3_amplitude	6.4	0	inf	False	Mo_3d_52_amplitude*0.064
+Mo_3d_52_alpha_3_sigma	0.2	0	inf	False	Mo_3d_52_sigma
 Mo_3d_52_alpha_3_gamma	0.02	-inf	inf	False	Mo_3d_52_gamma
-Mo_3d_52_alpha_3_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_52_gaussian_sigma
-Mo_3d_52_alpha_3_center	90.2	0.0	inf	False	Mo_3d_52_center-9.8
-Mo_3d_52_alpha_4_amplitude	3.2	0.0	inf	False	Mo_3d_52_amplitude*0.032
-Mo_3d_52_alpha_4_sigma	0.2	0.0	inf	False	Mo_3d_52_sigma
+Mo_3d_52_alpha_3_gaussian_sigma	0.2	0	inf	False	Mo_3d_52_gaussian_sigma
+Mo_3d_52_alpha_3_center	90.2	0	inf	False	Mo_3d_52_center-9.8
+Mo_3d_52_alpha_4_amplitude	3.2	0	inf	False	Mo_3d_52_amplitude*0.032
+Mo_3d_52_alpha_4_sigma	0.2	0	inf	False	Mo_3d_52_sigma
 Mo_3d_52_alpha_4_gamma	0.02	-inf	inf	False	Mo_3d_52_gamma
-Mo_3d_52_alpha_4_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_52_gaussian_sigma
-Mo_3d_52_alpha_4_center	88.2	0.0	inf	False	Mo_3d_52_center-11.8
-Mo_3d_52_alpha_5_amplitude	0.4	0.0	inf	False	Mo_3d_52_amplitude*0.004
-Mo_3d_52_alpha_5_sigma	0.2	0.0	inf	False	Mo_3d_52_sigma
+Mo_3d_52_alpha_4_gaussian_sigma	0.2	0	inf	False	Mo_3d_52_gaussian_sigma
+Mo_3d_52_alpha_4_center	88.2	0	inf	False	Mo_3d_52_center-11.8
+Mo_3d_52_alpha_5_amplitude	0.4	0	inf	False	Mo_3d_52_amplitude*0.004
+Mo_3d_52_alpha_5_sigma	0.2	0	inf	False	Mo_3d_52_sigma
 Mo_3d_52_alpha_5_gamma	0.02	-inf	inf	False	Mo_3d_52_gamma
-Mo_3d_52_alpha_5_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_52_gaussian_sigma
-Mo_3d_52_alpha_5_center	79.9	0.0	inf	False	Mo_3d_52_center-20.1
-Mo_3d_52_alpha_6_amplitude	0.3	0.0	inf	False	Mo_3d_52_amplitude*0.003
-Mo_3d_52_alpha_6_sigma	0.2	0.0	inf	False	Mo_3d_52_sigma
+Mo_3d_52_alpha_5_gaussian_sigma	0.2	0	inf	False	Mo_3d_52_gaussian_sigma
+Mo_3d_52_alpha_5_center	79.9	0	inf	False	Mo_3d_52_center-20.1
+Mo_3d_52_alpha_6_amplitude	0.3	0	inf	False	Mo_3d_52_amplitude*0.003
+Mo_3d_52_alpha_6_sigma	0.2	0	inf	False	Mo_3d_52_sigma
 Mo_3d_52_alpha_6_gamma	0.02	-inf	inf	False	Mo_3d_52_gamma
-Mo_3d_52_alpha_6_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_52_gaussian_sigma
-Mo_3d_52_alpha_6_center	76.6	0.0	inf	False	Mo_3d_52_center-23.4
-Mo_3d_52_beta_amplitude	0.6	0.0	inf	False	Mo_3d_52_amplitude*0.006
-Mo_3d_52_beta_sigma	0.2	0.0	inf	False	Mo_3d_52_sigma
+Mo_3d_52_alpha_6_gaussian_sigma	0.2	0	inf	False	Mo_3d_52_gaussian_sigma
+Mo_3d_52_alpha_6_center	76.6	0	inf	False	Mo_3d_52_center-23.4
+Mo_3d_52_beta_amplitude	0.6	0	inf	False	Mo_3d_52_amplitude*0.006
+Mo_3d_52_beta_sigma	0.2	0	inf	False	Mo_3d_52_sigma
 Mo_3d_52_beta_gamma	0.02	-inf	inf	False	Mo_3d_52_gamma
-Mo_3d_52_beta_gaussian_sigma	0.2	0.0	inf	False	Mo_3d_52_gaussian_sigma
-Mo_3d_52_beta_center	30.299999999999997	0.0	inf	False	Mo_3d_52_center-69.7
-Mo_3d_32_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_gaussian_sigma*1.1774
-Mo_3d_32_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_sigma*(2+Mo_3d_32_gamma*2.5135+(Mo_3d_32_gamma*3.6398)**4)
-Mo_3d_52_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_gaussian_sigma*1.1774
-Mo_3d_52_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_sigma*(2+Mo_3d_52_gamma*2.5135+(Mo_3d_52_gamma*3.6398)**4)
-Mo_3d_32_alpha_3_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_alpha_3_gaussian_sigma*1.1774
-Mo_3d_32_alpha_3_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_alpha_3_sigma*(2+Mo_3d_32_alpha_3_gamma*2.5135+(Mo_3d_32_alpha_3_gamma*3.6398)**4)
-Mo_3d_32_alpha_4_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_alpha_4_gaussian_sigma*1.1774
-Mo_3d_32_alpha_4_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_alpha_4_sigma*(2+Mo_3d_32_alpha_4_gamma*2.5135+(Mo_3d_32_alpha_4_gamma*3.6398)**4)
-Mo_3d_32_alpha_5_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_alpha_5_gaussian_sigma*1.1774
-Mo_3d_32_alpha_5_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_alpha_5_sigma*(2+Mo_3d_32_alpha_5_gamma*2.5135+(Mo_3d_32_alpha_5_gamma*3.6398)**4)
-Mo_3d_32_alpha_6_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_alpha_6_gaussian_sigma*1.1774
-Mo_3d_32_alpha_6_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_alpha_6_sigma*(2+Mo_3d_32_alpha_6_gamma*2.5135+(Mo_3d_32_alpha_6_gamma*3.6398)**4)
-Mo_3d_32_beta_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_32_beta_gaussian_sigma*1.1774
-Mo_3d_32_beta_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_32_beta_sigma*(2+Mo_3d_32_beta_gamma*2.5135+(Mo_3d_32_beta_gamma*3.6398)**4)
-Mo_3d_52_alpha_3_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_alpha_3_gaussian_sigma*1.1774
-Mo_3d_52_alpha_3_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_alpha_3_sigma*(2+Mo_3d_52_alpha_3_gamma*2.5135+(Mo_3d_52_alpha_3_gamma*3.6398)**4)
-Mo_3d_52_alpha_4_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_alpha_4_gaussian_sigma*1.1774
-Mo_3d_52_alpha_4_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_alpha_4_sigma*(2+Mo_3d_52_alpha_4_gamma*2.5135+(Mo_3d_52_alpha_4_gamma*3.6398)**4)
-Mo_3d_52_alpha_5_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_alpha_5_gaussian_sigma*1.1774
-Mo_3d_52_alpha_5_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_alpha_5_sigma*(2+Mo_3d_52_alpha_5_gamma*2.5135+(Mo_3d_52_alpha_5_gamma*3.6398)**4)
-Mo_3d_52_alpha_6_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_alpha_6_gaussian_sigma*1.1774
-Mo_3d_52_alpha_6_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_alpha_6_sigma*(2+Mo_3d_52_alpha_6_gamma*2.5135+(Mo_3d_52_alpha_6_gamma*3.6398)**4)
-Mo_3d_52_beta_gaussian_fwhm	0.47096000000000005	-inf	inf	False	2*Mo_3d_52_beta_gaussian_sigma*1.1774
-Mo_3d_52_beta_lorentzian_fwhm	0.41005961642625616	-inf	inf	False	Mo_3d_52_beta_sigma*(2+Mo_3d_52_beta_gamma*2.5135+(Mo_3d_52_beta_gamma*3.6398)**4)
+Mo_3d_52_beta_gaussian_sigma	0.2	0	inf	False	Mo_3d_52_gaussian_sigma
+Mo_3d_52_beta_center	30.3	0	inf	False	Mo_3d_52_center-69.7
+Mo_3d_32_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_gaussian_sigma*1.1774
+Mo_3d_32_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_sigma*(2+Mo_3d_32_gamma*2.5135+(Mo_3d_32_gamma*3.6398)**4)
+Mo_3d_52_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_gaussian_sigma*1.1774
+Mo_3d_52_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_sigma*(2+Mo_3d_52_gamma*2.5135+(Mo_3d_52_gamma*3.6398)**4)
+Mo_3d_32_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_alpha_3_gaussian_sigma*1.1774
+Mo_3d_32_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_alpha_3_sigma*(2+Mo_3d_32_alpha_3_gamma*2.5135+(Mo_3d_32_alpha_3_gamma*3.6398)**4)
+Mo_3d_32_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_alpha_4_gaussian_sigma*1.1774
+Mo_3d_32_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_alpha_4_sigma*(2+Mo_3d_32_alpha_4_gamma*2.5135+(Mo_3d_32_alpha_4_gamma*3.6398)**4)
+Mo_3d_32_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_alpha_5_gaussian_sigma*1.1774
+Mo_3d_32_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_alpha_5_sigma*(2+Mo_3d_32_alpha_5_gamma*2.5135+(Mo_3d_32_alpha_5_gamma*3.6398)**4)
+Mo_3d_32_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_alpha_6_gaussian_sigma*1.1774
+Mo_3d_32_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_alpha_6_sigma*(2+Mo_3d_32_alpha_6_gamma*2.5135+(Mo_3d_32_alpha_6_gamma*3.6398)**4)
+Mo_3d_32_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_32_beta_gaussian_sigma*1.1774
+Mo_3d_32_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_32_beta_sigma*(2+Mo_3d_32_beta_gamma*2.5135+(Mo_3d_32_beta_gamma*3.6398)**4)
+Mo_3d_52_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_alpha_3_gaussian_sigma*1.1774
+Mo_3d_52_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_alpha_3_sigma*(2+Mo_3d_52_alpha_3_gamma*2.5135+(Mo_3d_52_alpha_3_gamma*3.6398)**4)
+Mo_3d_52_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_alpha_4_gaussian_sigma*1.1774
+Mo_3d_52_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_alpha_4_sigma*(2+Mo_3d_52_alpha_4_gamma*2.5135+(Mo_3d_52_alpha_4_gamma*3.6398)**4)
+Mo_3d_52_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_alpha_5_gaussian_sigma*1.1774
+Mo_3d_52_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_alpha_5_sigma*(2+Mo_3d_52_alpha_5_gamma*2.5135+(Mo_3d_52_alpha_5_gamma*3.6398)**4)
+Mo_3d_52_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_alpha_6_gaussian_sigma*1.1774
+Mo_3d_52_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_alpha_6_sigma*(2+Mo_3d_52_alpha_6_gamma*2.5135+(Mo_3d_52_alpha_6_gamma*3.6398)**4)
+Mo_3d_52_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Mo_3d_52_beta_gaussian_sigma*1.1774
+Mo_3d_52_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Mo_3d_52_beta_sigma*(2+Mo_3d_52_beta_gamma*2.5135+(Mo_3d_52_beta_gamma*3.6398)**4)
