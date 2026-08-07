@@ -241,6 +241,37 @@ class XpsBatchFit:
     fit_table: pd.DataFrame
     peak_tables: dict[str, pd.DataFrame]
 
+    def get_spectrum(self, experiment, region):
+        spectrum_index = (
+            self.fit_table.query('label == @experiment')
+            [region].item()
+        )
+        spectrum = (
+            self.experiment_table.query('label == @experiment')
+            ['data'].item().spectra[int(spectrum_index)]
+        )
+        return spectrum
+    def get_params_path(self, region):
+        params_path = (
+            self.region_table.query('region == @region')
+            ['params file'].item()
+        )
+        return params_path
+
+    def check_guess(self, experiment, region, satellites):
+        peak_table = self.peak_tables[region]
+        params_path = self.get_params_path(region)
+        spectrum = self.get_spectrum(experiment, region)
+        fit_model = setup_fit_model(peak_table, "shirley", satellites) #fixme
+        guess_shirley = True #fixme
+        plot_initial_guess(
+            fit_model, params_path, spectrum.eV, spectrum.counts, guess_shirley)
+        plt.show()
+        fit = do_fit(
+            spectrum.eV, spectrum.counts, fit_model, params_path, guess_shirley)
+        plot_fit_result(spectrum.eV, spectrum.counts, fit, satellites)
+        return fit
+
 def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     experiment_table = pd.read_csv(experiment_table_filepath, sep = '\t')
     region_table = pd.read_csv(region_table_filepath, sep = '\t')
