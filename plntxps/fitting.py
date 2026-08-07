@@ -1,3 +1,4 @@
+from .logger import Logger, NullLogger
 import numpy as np
 from glob import glob
 import pandas as pd
@@ -11,6 +12,7 @@ from .spectrum import Spectrum
 from .background_subtraction import parametric_shirley_background
 from .core import read_datafile
 from os import mkdir
+from lmfit.model import save_modelresult
 
 def boilerplate():
     plt.gca().invert_xaxis()
@@ -247,6 +249,8 @@ class XpsBatchFit:
             self.fit_table.query('label == @experiment')
             [region].item()
         )
+        if pd.isna(spectrum_index):
+            return None
         spectrum = (
             self.experiment_table.query('label == @experiment')
             ['data'].item().spectra[int(spectrum_index)]
@@ -270,14 +274,32 @@ class XpsBatchFit:
             ['background type'].item()
         )
         return result
+    def region_should_be_fit(self, region):
+        result = (
+            self.region_table.query('region == @region')
+            ['do fit'].item()
+        )
+        return result
+    def experiment_should_be_fit(self, experiment):
+        result = (
+            self.fit_table.query('label == @experiment')
+            ['do fit'].item()
+        )
+        return result
+    @property
+    def all_regions(self):
+        return list(self.region_table['region'])
+    @property
+    def all_fitted_experiments(self):
+        return list(self.fit_table['label'])
 
     def check_guess(self, experiment, region):
         peak_table = self.peak_tables[region]
         params_path = self.get_params_path(region)
-        spectrum = self.get_spectrum(experiment, region)
         bg_type = self.get_bg_type(region)
-        fit_model = setup_fit_model(peak_table, bg_type, self.satellites) #fixme
         guess_shirley = self.get_guess_shirley(region)
+        spectrum = self.get_spectrum(experiment, region)
+        fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
         plot_initial_guess(
             fit_model, params_path, spectrum.eV, spectrum.counts, guess_shirley)
         plt.show()
@@ -285,6 +307,31 @@ class XpsBatchFit:
             spectrum.eV, spectrum.counts, fit_model, params_path, guess_shirley)
         plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites)
         return fit
+
+    def do_batch_fit(self, output_dir, logger: Logger = NullLogger()):
+        try: mkdir(output_dir)
+        except FileExistsError: pass
+        for region in self.all_regions:
+            if not self.region_should_be_fit(region): continue
+            try: mkdir(f"{output_dir}/{region}")
+            except FileExistsError: pass
+            logger.log(f"starting fit of {region}")
+            peak_table = self.peak_tables[region]
+            params_path = self.get_params_path(region)
+            bg_type = self.get_bg_type(region)
+            guess_shirley = self.get_guess_shirley(region)
+            for experiment in self.all_fitted_experiments:
+                if not self.experiment_should_be_fit(experiment): continue
+                spectrum = self.get_spectrum(experiment, region)
+                if type(spectrum) == type(None): continue
+                fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
+                fit = do_fit(
+                    spectrum.eV, spectrum.counts, fit_model,
+                    params_path, guess_shirley)
+                plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites)
+                plt.savefig(f"{output_dir}/{region}/{experiment}.svg")
+                plt.close()
+                save_modelresult(fit, f"{output_dir}/{region}/{experiment}.json")
 
 def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     experiment_table = pd.read_csv(experiment_table_filepath, sep = '\t')
