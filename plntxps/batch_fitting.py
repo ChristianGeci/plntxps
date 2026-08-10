@@ -15,6 +15,7 @@ class XpsBatchFit:
     region_table: pd.DataFrame
     fit_table: pd.DataFrame
     peak_tables: dict[str, pd.DataFrame]
+    overrides: list[dict]
     satellites: dict
 
     def slice_requested(self, region):
@@ -251,3 +252,32 @@ def make_params_files(region_table, peak_tables, satellites):
         peak_table = peak_tables[region]
         setup_fit_params(peak_table, path, satellites)
     return
+
+@dataclass
+class FitOverride:
+    region: str
+    label: str
+    items: dict
+
+def read_overrides(directory_path):
+    result = []
+    for path in glob(f"{directory_path}/*.csv"):
+        with open(path, 'r') as f:
+            lines = [line for line in f.read().split('\n') if line]
+            parsed_lines = [line.split('\t') for line in lines]
+            parsed_lines = [
+                parsed_line for parsed_line in parsed_lines 
+                if len(parsed_line) == 2
+            ]
+        parsing_dict = {}
+        for parsed_line in parsed_lines:
+            parsing_dict[parsed_line[0]] = parsed_line[1]
+        region = parsing_dict.pop('region')
+        label = parsing_dict.pop('label')
+        fit_override = FitOverride(
+            region,
+            label,
+            parsing_dict,
+        )
+        result.append(fit_override)
+    return result
