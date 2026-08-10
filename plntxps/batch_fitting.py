@@ -18,17 +18,25 @@ class XpsBatchFit:
     overrides: list[dict]
     satellites: dict
 
+    def __post_init__(self):
+        self.override_table = {
+            override.key: override for override in self.overrides
+        }
+
     def slice_requested(self, region):
         slice_bounds_string = (
             self.region_table.query('region == @region')
             ['slice'].item()
         )
         return not pd.isna(slice_bounds_string)
-    def get_slice_bounds(self, region):
-        slice_bounds_string = (
-            self.region_table.query('region == @region')
-            ['slice'].item()
-        )
+    def get_slice_bounds(self, experiment, region):
+        if (region, experiment) in self.override_table.keys(): # fixme: hard coded key format
+            slice_bounds_string = self.override_table[(region, experiment)].get('slice')
+        else:
+            slice_bounds_string = (
+                self.region_table.query('region == @region')
+                ['slice'].item()
+            )
         parsed_string = slice_bounds_string.split('-')
         lower_bound = float(parsed_string[0])
         upper_bound = float(parsed_string[1])
@@ -45,7 +53,8 @@ class XpsBatchFit:
             ['data'].item().spectra[int(spectrum_index)]
         )
         if self.slice_requested(region):
-            slice_lower_bound, slice_upper_bound = self.get_slice_bounds(region)
+            slice_lower_bound, slice_upper_bound = self.get_slice_bounds(
+                experiment, region)
             spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
         return spectrum
     def get_params_path(self, region):
@@ -258,6 +267,16 @@ class FitOverride:
     region: str
     label: str
     items: dict
+
+    @property
+    def key(self):
+        return (self.region, self.label)
+
+    def contains(self, key):
+        return key in self.items.keys()
+
+    def get(self, key):
+        return self.items[key]
 
 def read_overrides(directory_path):
     result = []
