@@ -196,7 +196,7 @@ def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
     region_table['peaks file'] = peak_paths
     region_table.to_csv(filepath, sep = '\t', index = False)
 
-def make_empty_fit_table(experiment_table, region_table, filepath):
+def make_fit_table(experiment_table, region_table, filepath):
     if Path(filepath).is_file():
         fit_table = pd.read_csv(filepath, sep = '\t')
     else:
