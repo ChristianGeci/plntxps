@@ -1,5 +1,6 @@
 from .core import *
 from .fitting import *
+from .batch_fitting import *
 from .logger import *
 from .charge_curve_spline import subtract_splines
 
