@@ -129,15 +129,26 @@ def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     experiment_table = pd.read_csv(experiment_table_filepath, sep = '\t')
     region_table = pd.read_csv(region_table_filepath, sep = '\t')
 
-def make_blank_experiment_table(data_directory_path, experiment_table_path):
-    if Path(experiment_table_path).is_file(): return
+def make_experiment_table(data_directory_path, experiment_table_path):
+    if Path(experiment_table_path).is_file(): 
+        experiment_table = pd.read_csv(experiment_table_path, sep = '\t')
+    else:
+        experiment_table = pd.DataFrame()
+    new_rows = []
     data_paths = glob(f"{data_directory_path}*.xy")
-    with open(experiment_table_path, 'w') as f:
-        f.write("filepath\tlabel\n")
-        for path in data_paths:
-            print(path) # debug
-            f.write(f"{path}\t\n")
-        f.close()
+    for path in data_paths:
+        if path in list(experiment_table.get('filepath', [])):
+            continue
+        new_row = {
+            "filepath": path,
+            "label": None
+        }
+        new_rows.append(new_row)
+    experiment_table = pd.concat([
+        experiment_table,
+        pd.DataFrame(new_rows)
+    ])
+    experiment_table.to_csv(experiment_table_path, sep = '\t', index = False)
     return
 def read_experiment_table(experiment_table_filepath):
     result = pd.read_csv(experiment_table_filepath, sep = '\t')
@@ -162,6 +173,7 @@ def make_blank_region_table(filepath):
         f.close()
     return
 def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
+    # how to prevent unwanted overwriting?
     region_table = pd.read_csv(filepath, sep = '\t')
     peak_paths = []
     params_paths = []
@@ -211,8 +223,9 @@ def read_peak_tables(region_table):
 
 def make_params_files(region_table, peak_tables, satellites):
     for index, row in region_table.iterrows():
+        path = row['params file']
+        if Path(path).is_file(): continue # redundant with make_params_file
         region = row['region']
         peak_table = peak_tables[region]
-        path = row['params file']
         setup_fit_params(peak_table, path, satellites)
     return
