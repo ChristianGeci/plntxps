@@ -137,16 +137,16 @@ def make_experiment_table(data_directory_path, experiment_table_path):
     new_rows = []
     data_paths = glob(f"{data_directory_path}*.xy")
     for path in data_paths:
-        if path in list(experiment_table.get('filepath', [])):
-            continue
+        if path in list(experiment_table.get('filepath', [])): continue
         new_row = {
             "filepath": path,
             "label": None
         }
         new_rows.append(new_row)
     experiment_table = pd.concat([
-        experiment_table,
-        pd.DataFrame(new_rows)
+        df for df in 
+        [experiment_table, pd.DataFrame(new_rows)]
+        if not df.empty
     ])
     experiment_table.to_csv(experiment_table_path, sep = '\t', index = False)
     return
@@ -157,6 +157,15 @@ def read_experiment_table(experiment_table_filepath):
         datafiles.append(read_datafile(row['filepath']))
     result['data'] = datafiles
     return result
+def dump_spectrum_lists(experiment_table, output_directory):
+    if not Path(output_directory).is_dir():
+        mkdir(output_directory)
+    for index, row in experiment_table.iterrows():
+        label = row['label']
+        spectrum_list = row['data'].spectrum_list()
+        with open(f"{output_directory}/{label}.txt", 'w') as f:
+            f.write(spectrum_list)
+            f.close()
 
 def make_blank_region_table(filepath):
     if Path(filepath).is_file(): return
@@ -187,12 +196,24 @@ def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
     region_table.to_csv(filepath, sep = '\t', index = False)
 
 def make_empty_fit_table(experiment_table, region_table, filepath):
-    if Path(filepath).is_file(): return
-    fit_table = pd.DataFrame()
-    fit_table['label'] = experiment_table['label']
-    for region in region_table['region']:
-        fit_table[region] = None
-    fit_table['do fit'] = None
+    if Path(filepath).is_file():
+        fit_table = pd.read_csv(filepath, sep = '\t')
+    else:
+        fit_table = pd.DataFrame()
+    new_rows = []
+    for label in experiment_table['label']:
+        if label in list(fit_table.get('label', [])): continue
+        new_row = {}
+        new_row['label'] = label
+        for region in region_table['region']:
+            new_row[region] = None
+        new_row['do fit'] = None
+        new_rows.append(new_row)
+    fit_table = pd.concat([
+        df for df in 
+        [fit_table, pd.DataFrame(new_rows)]
+        if not df.empty
+    ])
     fit_table.to_csv(filepath, sep = '\t', index = False)
     return
 
