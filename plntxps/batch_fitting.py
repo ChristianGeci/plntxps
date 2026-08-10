@@ -167,18 +167,19 @@ def dump_spectrum_lists(experiment_table, output_directory):
             f.write(spectrum_list)
             f.close()
 
+REGION_TABLE_HEADERS = [
+    'region',
+    'params file',
+    'peaks file',
+    'slice',
+    'do fit',
+    'background type',
+    'guess shirley',
+]
 def make_blank_region_table(filepath):
     if Path(filepath).is_file(): return
     with open(filepath, 'w') as f:
-        f.write(
-            'region'
-            '\tparams file'
-            '\tpeaks file'
-            '\tslice'
-            '\tdo fit'
-            '\tbackground type'
-            '\tguess shirley'
-            )
+        f.write('\t'.join(REGION_TABLE_HEADERS))
         f.close()
     return
 def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
