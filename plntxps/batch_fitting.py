@@ -7,6 +7,7 @@ from lmfit.model import save_modelresult
 import pandas as pd
 from .logger import Logger, NullLogger
 from .fitting import *
+from pathlib import Path
 
 @dataclass
 class XpsBatchFit:
@@ -129,7 +130,7 @@ def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     region_table = pd.read_csv(region_table_filepath, sep = '\t')
 
 def make_blank_experiment_table(data_directory_path, experiment_table_path):
-    # todo: prevent overwriting
+    if Path(experiment_table_path).is_file(): return
     data_paths = glob(f"{data_directory_path}*.xy")
     with open(experiment_table_path, 'w') as f:
         f.write("filepath\tlabel\n")
@@ -147,7 +148,7 @@ def read_experiment_table(experiment_table_filepath):
     return result
 
 def make_blank_region_table(filepath):
-    # todo: prevent overwriting
+    if Path(filepath).is_file(): return
     with open(filepath, 'w') as f:
         f.write(
             'region'
@@ -174,7 +175,7 @@ def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
     region_table.to_csv(filepath, sep = '\t', index = False)
 
 def make_empty_fit_table(experiment_table, region_table, filepath):
-    # todo: prevent overwriting
+    if Path(filepath).is_file(): return
     fit_table = pd.DataFrame()
     fit_table['label'] = experiment_table['label']
     for region in region_table['region']:
@@ -193,6 +194,7 @@ def make_empty_peak_tables(region_table, directory_path):
     except FileExistsError: pass
     for region in region_table['region']:
         filepath = f"{directory_path}/{region}.csv"
+        if Path(filepath).is_file(): continue
         with open(filepath, 'w') as f:
             f.write(empty_table)
             f.close()
