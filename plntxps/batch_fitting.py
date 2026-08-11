@@ -248,12 +248,13 @@ def make_fit_table(experiment_table, region_table, filepath):
     fit_table.to_csv(filepath, sep = '\t', index = False)
     return
 
+PEAK_TABLE_HEADERS = [
+    "peak name",
+    "has satellites",
+    "peak shape",
+]
 def make_empty_peak_tables(region_table, directory_path):
-    empty_table = (
-        "peak name"
-        "\thas satellites"
-        "\tpeak shape"
-    )
+    empty_table = "\t".join(PEAK_TABLE_HEADERS)
     try: mkdir(directory_path)
     except FileExistsError: pass
     for region in region_table['region']:
@@ -271,6 +272,11 @@ def read_peak_tables(region_table):
         filepath = row['peaks file']
         peak_table = pd.read_csv(filepath, sep = '\t')
         result[region] = peak_table
+    for peak_table in result.values():
+        processed_names = []
+        for index, row in peak_table.iterrows():
+            processed_names.append(process_peak_name(row['peak name']))
+        peak_table['processed peak name'] = processed_names
     return result
 
 def make_params_files(region_table, peak_tables, satellites):
