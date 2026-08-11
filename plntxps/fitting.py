@@ -174,7 +174,7 @@ def plot_fit_result(eV, counts, fit_result, satellites, peak_table, custom_backg
             adjusted_curve = curve
         plt.plot(eV, adjusted_curve, label = name[:-1], ls = 'dashed')
 
-    plt.legend()
+    plt.legend(loc = 'upper left', bbox_to_anchor = (1, 1))
 
 def fit_procedure(
         eV: np.ndarray[float], counts: np.ndarray[float],
