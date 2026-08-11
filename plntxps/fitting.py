@@ -113,15 +113,14 @@ def do_fit(eV, counts, fit_model, params_path, guess_shirley):
         x = eV, y = counts)
     return result
 
-def group_components(components, satellites):
+def group_components(components, satellites, peak_table):
     component_table = {}
     # get parent peaks
     for curve_name in components.keys():
-        is_satellite = False
         for satellite in satellites.values():
             if satellite['name'] in curve_name:
-                is_satellite = True
-        if not is_satellite:
+                break
+        else:
             component_table[curve_name] = [curve_name]
     # get satellites
     for parent_curve in list(component_table.keys()):
@@ -136,7 +135,7 @@ def group_components(components, satellites):
         result[parent_peak_name] = np.sum(curves, axis = 0)
     return result
 
-def plot_fit_result(eV, counts, fit_result, satellites, custom_background = None):
+def plot_fit_result(eV, counts, fit_result, satellites, peak_table, custom_background = None):
     components = fit_result.eval_components(x = eV, y = counts)
     plt.plot(eV, counts, color = 'black', label = 'data')
     boilerplate()
@@ -160,7 +159,7 @@ def plot_fit_result(eV, counts, fit_result, satellites, custom_background = None
         plt.plot(eV, fit_result.best_fit, label = 'fit')
 
     if type(satellites) != type(None):
-        grouped_components = group_components(components, satellites)
+        grouped_components = group_components(components, satellites, peak_table)
     else:
         grouped_components = components
     for name, curve in grouped_components.items():

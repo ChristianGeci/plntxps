@@ -126,7 +126,7 @@ class XpsBatchFit:
         plt.show()
         fit = do_fit(
             spectrum.eV, spectrum.counts, fit_model, params_path, guess_shirley)
-        plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites)
+        plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites, peak_table)
         return fit
 
     def do_batch_fit(self, output_dir, logger: Logger = NullLogger()):
@@ -150,7 +150,7 @@ class XpsBatchFit:
                 fit = do_fit(
                     spectrum.eV, spectrum.counts, fit_model,
                     params_path, guess_shirley)
-                plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites)
+                plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites, peak_table)
                 plt.savefig(f"{output_dir}/{region}/{experiment}.svg")
                 plt.close()
                 save_modelresult(fit, f"{output_dir}/{region}/{experiment}.json")
