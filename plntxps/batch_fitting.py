@@ -69,19 +69,26 @@ class XpsBatchFit:
                 experiment, region)
             spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
         return spectrum
+    # todo: should the three functions below be consilidated?
     def get_params_path(self, experiment, region):
+        override = self.get_override(experiment, region, "params file")
+        if override: return override
         params_path = (
             self.region_table.query('region == @region')
             ['params file'].item()
         )
         return params_path
     def get_guess_shirley(self, experiment, region):
+        override = self.get_override(experiment, region, "guess shirley")
+        if override: return override
         result = (
             self.region_table.query('region == @region')
             ['guess shirley'].item()
         )
         return result
     def get_bg_type(self, experiment, region):
+        override = self.get_override(experiment, region, "bg type")
+        if override: return override
         result = (
             self.region_table.query('region == @region')
             ['background type'].item()
