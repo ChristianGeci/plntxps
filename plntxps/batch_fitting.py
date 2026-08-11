@@ -30,6 +30,12 @@ class XpsBatchFit:
             override.key: override for override in self.overrides
         }
 
+    def get_override(self, experiment, region, key):
+        if (region, experiment) in self.override_table.keys(): # fixme: hard coded key format
+           return self.override_table[(region, experiment)].get('slice')
+        else: 
+            return None
+            
     def slice_requested(self, region):
         slice_bounds_string = (
             self.region_table.query('region == @region')
@@ -37,9 +43,8 @@ class XpsBatchFit:
         )
         return not pd.isna(slice_bounds_string)
     def get_slice_bounds(self, experiment, region):
-        if (region, experiment) in self.override_table.keys(): # fixme: hard coded key format
-            slice_bounds_string = self.override_table[(region, experiment)].get('slice')
-        else:
+        slice_bounds_string = self.get_override(experiment, region, 'slice')
+        if not slice_bounds_string:
             slice_bounds_string = (
                 self.region_table.query('region == @region')
                 ['slice'].item()
@@ -128,6 +133,7 @@ class XpsBatchFit:
             peak_table = self.peak_tables[region]
             for experiment in self.all_fitted_experiments:
                 if not self.experiment_should_be_fit(experiment): continue
+                logger.log(f"\tstarting fit of {experiment}")
                 params_path = self.get_params_path(experiment, region)
                 bg_type = self.get_bg_type(experiment, region)
                 guess_shirley = self.get_guess_shirley(experiment, region)
