@@ -10,6 +10,13 @@ from .fitting import *
 from pathlib import Path
 
 @dataclass
+class FitInput:
+    spectrum: Spectrum
+    params_path: str
+    bg_type: str
+    guess_shirley: bool
+
+@dataclass
 class XpsBatchFit:
     experiment_table: pd.DataFrame
     region_table: pd.DataFrame
@@ -48,19 +55,19 @@ class XpsBatchFit:
             slice_lower_bound, slice_upper_bound = self.get_slice_bounds(region)
             spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
         return spectrum
-    def get_params_path(self, region):
+    def get_params_path(self, experiment, region):
         params_path = (
             self.region_table.query('region == @region')
             ['params file'].item()
         )
         return params_path
-    def get_guess_shirley(self, region):
+    def get_guess_shirley(self, experiment, region):
         result = (
             self.region_table.query('region == @region')
             ['guess shirley'].item()
         )
         return result
-    def get_bg_type(self, region):
+    def get_bg_type(self, experiment, region):
         result = (
             self.region_table.query('region == @region')
             ['background type'].item()
@@ -87,9 +94,9 @@ class XpsBatchFit:
 
     def check_guess(self, experiment, region):
         peak_table = self.peak_tables[region]
-        params_path = self.get_params_path(region)
-        bg_type = self.get_bg_type(region)
-        guess_shirley = self.get_guess_shirley(region)
+        params_path = self.get_params_path(experiment, region)
+        bg_type = self.get_bg_type(experiment, region)
+        guess_shirley = self.get_guess_shirley(experiment, region)
         spectrum = self.get_spectrum(experiment, region)
         print(f"resolution: {spectrum.info.resolution}")
         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
@@ -110,11 +117,11 @@ class XpsBatchFit:
             except FileExistsError: pass
             logger.log(f"starting fit of {region}")
             peak_table = self.peak_tables[region]
-            params_path = self.get_params_path(region)
-            bg_type = self.get_bg_type(region)
-            guess_shirley = self.get_guess_shirley(region)
             for experiment in self.all_fitted_experiments:
                 if not self.experiment_should_be_fit(experiment): continue
+                params_path = self.get_params_path(experiment, region)
+                bg_type = self.get_bg_type(experiment, region)
+                guess_shirley = self.get_guess_shirley(experiment, region)
                 spectrum = self.get_spectrum(experiment, region)
                 if type(spectrum) == type(None): continue
                 fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
