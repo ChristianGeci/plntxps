@@ -124,8 +124,13 @@ def group_components(components, satellites, peak_table):
             component_table[curve_name] = [curve_name]
     # get satellites
     for parent_curve in list(component_table.keys()):
-        if "shirley" in parent_curve or "tougaard" in parent_curve:
-            continue
+        if "shirley" in parent_curve or "tougaard" in parent_curve: continue
+        parent_curve_no_underscore = parent_curve[:-1]
+        if (
+            not
+            peak_table.query("`processed peak name` == @parent_curve_no_underscore")
+            ['has satellites'].item()
+            ): continue
         for n in range(1, len(satellites)):
             component_table[parent_curve].append(
                 f"{parent_curve}{satellites[n]['name']}_")
