@@ -80,7 +80,7 @@ class XpsBatchFit:
         return params_path
     def get_guess_shirley(self, experiment, region):
         override = self.get_override(experiment, region, "guess shirley")
-        if override: return override
+        if override: return override.lower() == "true"
         result = (
             self.region_table.query('region == @region')
             ['guess shirley'].item()
@@ -296,7 +296,7 @@ class FitOverride:
         return key in self.items.keys()
 
     def get(self, key):
-        return self.items[key]
+        return self.items.get(key)
 
 def read_overrides(directory_path):
     result = []
