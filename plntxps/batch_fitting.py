@@ -32,7 +32,7 @@ class XpsBatchFit:
 
     def get_override(self, experiment, region, key):
         if (region, experiment) in self.override_table.keys(): # fixme: hard coded key format
-           return self.override_table[(region, experiment)].get('slice')
+           return self.override_table[(region, experiment)].get(key)
         else: 
             return None
             
