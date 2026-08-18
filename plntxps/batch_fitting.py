@@ -1,8 +1,9 @@
 from glob import glob
+from lmfit.model import load_modelresult
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from .core import read_datafile
-from os import mkdir
+from os import mkdir, listdir
 from lmfit.model import save_modelresult
 import pandas as pd
 from .logger import Logger, NullLogger
@@ -340,3 +341,61 @@ def make_spectrum_lists(experiment_table, directory_path):
         with open(path, 'w') as f:
             f.write(datafile.spectrum_list())
             f.close()
+
+def get_independent_params(params):
+    result_dict = {name: param for name, param in params.items() if not param.expr}
+    result = lmfit.create_params()
+    for param in result_dict.values():
+        result.add(param)
+    return result
+
+def shrink_fit_results(fit_result_directory, logger = NullLogger()):
+    paths = glob(f"{fit_result_directory}/*/*.json")
+    for index, path in enumerate(paths):
+        logger.log(f"starting {index+1} of {len(paths)}")
+        modelresult = load_modelresult(path)
+        ind_params = get_independent_params(modelresult.params)
+        dumps = ind_params.dumps()
+        with open(path + ".lite", 'w') as f:
+            f.write(dumps)
+            f.close()
+
+def read_shrunk_fit_results(
+        experiment_table,
+        region_table,
+        fit_result_directory,
+        logger = NullLogger()):
+    result = {}
+    subfolders = set(listdir(fit_result_directory))
+    regions = set(region_table['region'])
+    found_regions = subfolders & regions
+    labels = list(experiment_table['label'])
+    for label in labels:
+        result[label] = {}
+        for region in found_regions:
+            path = f"{fit_result_directory}/{region}/{label}.json.lite"
+            if Path(path).is_file():
+                logger.log(f"file found for {path}")
+                params = lmfit.create_params()
+                with open(path, 'r') as f:
+                    dumps = f.read()
+                    f.close()
+                params.loads(dumps)
+                result[label][region] = params
+            else:
+                logger.log(f"no file found for {path}")
+    experiment_table['fit results'] = list(result.values())
+    return
+
+def get_param(experiment_table, label, region, param_name):
+    try:
+        params = experiment_table.query('label == @label')['fit results'].item()
+        return params[region][param_name].value
+    except KeyError:
+        return None
+
+def get_params(experiment_table, region, param_name):
+    result = []
+    for label in experiment_table['label']:
+        result.append(get_param(experiment_table, label, region, param_name))
+    return result
