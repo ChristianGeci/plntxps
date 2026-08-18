@@ -72,7 +72,7 @@ class Spectrum:
     "Timestamp of spectrum acquisition"
     child_operations: list[Operation]
     "Operations (e.g. peak area, multi-peak fit) which reference this spectrum"
-    photon_energy: float
+    photon_energy: float # todo: remove due to redundance with SpectrumInfo object
     "Photon Energy (in eV)"
     charge_correction: float = None
     "Shift applied to binding energy to account for charging effects"
@@ -160,7 +160,7 @@ def read_spectrum(header: str, data: str) -> Spectrum:
     eV, counts = get_data(data) 
     time = get_time(header)
     name = get_info(header, "Region")
-    photon_energy = get_info(header, "Excitation Energy")
+    photon_energy = float(get_info(header, "Excitation Energy"))
     comment = get_comment(header)
     scans = [read_scan(header, data)]
     info = get_spectrum_info(header)
