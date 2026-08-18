@@ -326,3 +326,13 @@ def read_overrides(directory_path):
         )
         result.append(fit_override)
     return result
+
+def make_spectrum_lists(experiment_table, directory_path):
+    if not Path(directory_path).is_dir():
+        mkdir(directory_path)
+    for label, datafile in zip(
+            experiment_table['label'], experiment_table['data']):
+        path = f"{directory_path}/{label}.txt"
+        with open(path, 'w') as f:
+            f.write(datafile.spectrum_list())
+            f.close()
