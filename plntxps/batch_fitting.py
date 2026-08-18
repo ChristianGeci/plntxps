@@ -213,6 +213,10 @@ def make_blank_region_table(filepath):
         f.close()
     return
 def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
+    if not Path(peaks_dir_path).is_dir():
+        mkdir(peaks_dir_path)
+    if not Path(params_dir_path).is_dir():
+        mkdir(params_dir_path)
     # how to prevent unwanted overwriting?
     region_table = pd.read_csv(filepath, sep = '\t')
     peak_paths = []
