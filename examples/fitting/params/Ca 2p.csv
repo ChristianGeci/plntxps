@@ -1,0 +1,92 @@
+Parameter	value	min	max	vary	expr
+shirley_flat_background	0	0	inf	True	
+shirley_step_height	0	0	inf	True	
+					
+Ca_2p_32_amplitude	5000	0	inf	True	
+Ca_2p_32_sigma	0.2	0	inf	True	
+Ca_2p_32_gamma	0.02			False	
+Ca_2p_32_gaussian_sigma	0.904651717764909			False	
+Ca_2p_32_center	350	0	inf	True	
+					
+Ca_2p_12_amplitude	100	0	inf	True	Ca_2p_32_amplitude * 1.74/3.39
+Ca_2p_12_sigma					Ca_2p_32_sigma
+Ca_2p_12_gamma	0.02			False	
+Ca_2p_12_gaussian_sigma					Ca_2p_32_gaussian_sigma
+Ca_2p_12_center	100	0	inf	True	Ca_2p_32_center + 3.6
+					
+					
+					
+Ca_2p_32_alpha_3_amplitude	8	0	inf	False	Ca_2p_32_amplitude*0.08
+Ca_2p_32_alpha_3_sigma	0.2	0	inf	False	Ca_2p_32_sigma
+Ca_2p_32_alpha_3_gamma	0.02	-inf	inf	False	Ca_2p_32_gamma
+Ca_2p_32_alpha_3_gaussian_sigma	0.2	0	inf	False	Ca_2p_32_gaussian_sigma
+Ca_2p_32_alpha_3_center	91.6	0	inf	False	Ca_2p_32_center-8.4
+Ca_2p_32_alpha_4_amplitude	4.1	0	inf	False	Ca_2p_32_amplitude*0.040999999999999995
+Ca_2p_32_alpha_4_sigma	0.2	0	inf	False	Ca_2p_32_sigma
+Ca_2p_32_alpha_4_gamma	0.02	-inf	inf	False	Ca_2p_32_gamma
+Ca_2p_32_alpha_4_gaussian_sigma	0.2	0	inf	False	Ca_2p_32_gaussian_sigma
+Ca_2p_32_alpha_4_center	89.9	0	inf	False	Ca_2p_32_center-10.1
+Ca_2p_32_alpha_5_amplitude	0.6	0	inf	False	Ca_2p_32_amplitude*0.006
+Ca_2p_32_alpha_5_sigma	0.2	0	inf	False	Ca_2p_32_sigma
+Ca_2p_32_alpha_5_gamma	0.02	-inf	inf	False	Ca_2p_32_gamma
+Ca_2p_32_alpha_5_gaussian_sigma	0.2	0	inf	False	Ca_2p_32_gaussian_sigma
+Ca_2p_32_alpha_5_center	82.4	0	inf	False	Ca_2p_32_center-17.6
+Ca_2p_32_alpha_6_amplitude	0.5	0	inf	False	Ca_2p_32_amplitude*0.005
+Ca_2p_32_alpha_6_sigma	0.2	0	inf	False	Ca_2p_32_sigma
+Ca_2p_32_alpha_6_gamma	0.02	-inf	inf	False	Ca_2p_32_gamma
+Ca_2p_32_alpha_6_gaussian_sigma	0.2	0	inf	False	Ca_2p_32_gaussian_sigma
+Ca_2p_32_alpha_6_center	79.7	0	inf	False	Ca_2p_32_center-20.3
+Ca_2p_32_beta_amplitude	0.5	0	inf	False	Ca_2p_32_amplitude*0.005
+Ca_2p_32_beta_sigma	0.2	0	inf	False	Ca_2p_32_sigma
+Ca_2p_32_beta_gamma	0.02	-inf	inf	False	Ca_2p_32_gamma
+Ca_2p_32_beta_gaussian_sigma	0.2	0	inf	False	Ca_2p_32_gaussian_sigma
+Ca_2p_32_beta_center	51.3	0	inf	False	Ca_2p_32_center-48.7
+Ca_2p_12_alpha_3_amplitude	8	0	inf	False	Ca_2p_12_amplitude*0.08
+Ca_2p_12_alpha_3_sigma	0.2	0	inf	False	Ca_2p_12_sigma
+Ca_2p_12_alpha_3_gamma	0.02	-inf	inf	False	Ca_2p_12_gamma
+Ca_2p_12_alpha_3_gaussian_sigma	0.2	0	inf	False	Ca_2p_12_gaussian_sigma
+Ca_2p_12_alpha_3_center	91.6	0	inf	False	Ca_2p_12_center-8.4
+Ca_2p_12_alpha_4_amplitude	4.1	0	inf	False	Ca_2p_12_amplitude*0.040999999999999995
+Ca_2p_12_alpha_4_sigma	0.2	0	inf	False	Ca_2p_12_sigma
+Ca_2p_12_alpha_4_gamma	0.02	-inf	inf	False	Ca_2p_12_gamma
+Ca_2p_12_alpha_4_gaussian_sigma	0.2	0	inf	False	Ca_2p_12_gaussian_sigma
+Ca_2p_12_alpha_4_center	89.9	0	inf	False	Ca_2p_12_center-10.1
+Ca_2p_12_alpha_5_amplitude	0.6	0	inf	False	Ca_2p_12_amplitude*0.006
+Ca_2p_12_alpha_5_sigma	0.2	0	inf	False	Ca_2p_12_sigma
+Ca_2p_12_alpha_5_gamma	0.02	-inf	inf	False	Ca_2p_12_gamma
+Ca_2p_12_alpha_5_gaussian_sigma	0.2	0	inf	False	Ca_2p_12_gaussian_sigma
+Ca_2p_12_alpha_5_center	82.4	0	inf	False	Ca_2p_12_center-17.6
+Ca_2p_12_alpha_6_amplitude	0.5	0	inf	False	Ca_2p_12_amplitude*0.005
+Ca_2p_12_alpha_6_sigma	0.2	0	inf	False	Ca_2p_12_sigma
+Ca_2p_12_alpha_6_gamma	0.02	-inf	inf	False	Ca_2p_12_gamma
+Ca_2p_12_alpha_6_gaussian_sigma	0.2	0	inf	False	Ca_2p_12_gaussian_sigma
+Ca_2p_12_alpha_6_center	79.7	0	inf	False	Ca_2p_12_center-20.3
+Ca_2p_12_beta_amplitude	0.5	0	inf	False	Ca_2p_12_amplitude*0.005
+Ca_2p_12_beta_sigma	0.2	0	inf	False	Ca_2p_12_sigma
+Ca_2p_12_beta_gamma	0.02	-inf	inf	False	Ca_2p_12_gamma
+Ca_2p_12_beta_gaussian_sigma	0.2	0	inf	False	Ca_2p_12_gaussian_sigma
+Ca_2p_12_beta_center	51.3	0	inf	False	Ca_2p_12_center-48.7
+Ca_2p_32_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_gaussian_sigma*1.1774
+Ca_2p_32_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_sigma*(2+Ca_2p_32_gamma*2.5135+(Ca_2p_32_gamma*3.6398)**4)
+Ca_2p_12_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_gaussian_sigma*1.1774
+Ca_2p_12_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_sigma*(2+Ca_2p_12_gamma*2.5135+(Ca_2p_12_gamma*3.6398)**4)
+Ca_2p_32_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_alpha_3_gaussian_sigma*1.1774
+Ca_2p_32_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_alpha_3_sigma*(2+Ca_2p_32_alpha_3_gamma*2.5135+(Ca_2p_32_alpha_3_gamma*3.6398)**4)
+Ca_2p_32_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_alpha_4_gaussian_sigma*1.1774
+Ca_2p_32_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_alpha_4_sigma*(2+Ca_2p_32_alpha_4_gamma*2.5135+(Ca_2p_32_alpha_4_gamma*3.6398)**4)
+Ca_2p_32_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_alpha_5_gaussian_sigma*1.1774
+Ca_2p_32_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_alpha_5_sigma*(2+Ca_2p_32_alpha_5_gamma*2.5135+(Ca_2p_32_alpha_5_gamma*3.6398)**4)
+Ca_2p_32_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_alpha_6_gaussian_sigma*1.1774
+Ca_2p_32_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_alpha_6_sigma*(2+Ca_2p_32_alpha_6_gamma*2.5135+(Ca_2p_32_alpha_6_gamma*3.6398)**4)
+Ca_2p_32_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_32_beta_gaussian_sigma*1.1774
+Ca_2p_32_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_32_beta_sigma*(2+Ca_2p_32_beta_gamma*2.5135+(Ca_2p_32_beta_gamma*3.6398)**4)
+Ca_2p_12_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_alpha_3_gaussian_sigma*1.1774
+Ca_2p_12_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_alpha_3_sigma*(2+Ca_2p_12_alpha_3_gamma*2.5135+(Ca_2p_12_alpha_3_gamma*3.6398)**4)
+Ca_2p_12_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_alpha_4_gaussian_sigma*1.1774
+Ca_2p_12_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_alpha_4_sigma*(2+Ca_2p_12_alpha_4_gamma*2.5135+(Ca_2p_12_alpha_4_gamma*3.6398)**4)
+Ca_2p_12_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_alpha_5_gaussian_sigma*1.1774
+Ca_2p_12_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_alpha_5_sigma*(2+Ca_2p_12_alpha_5_gamma*2.5135+(Ca_2p_12_alpha_5_gamma*3.6398)**4)
+Ca_2p_12_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_alpha_6_gaussian_sigma*1.1774
+Ca_2p_12_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_alpha_6_sigma*(2+Ca_2p_12_alpha_6_gamma*2.5135+(Ca_2p_12_alpha_6_gamma*3.6398)**4)
+Ca_2p_12_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Ca_2p_12_beta_gaussian_sigma*1.1774
+Ca_2p_12_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Ca_2p_12_beta_sigma*(2+Ca_2p_12_beta_gamma*2.5135+(Ca_2p_12_beta_gamma*3.6398)**4)

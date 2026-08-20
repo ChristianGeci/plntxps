@@ -1,0 +1,4 @@
+region	params file	peaks file	slice	do fit	background type	guess shirley
+C 1s	params/C 1s.csv	peaks/C 1s.csv	260-340	True	shirley	True
+Si	params/Si.csv	peaks/Si.csv	65-300	False	shirley	TRUE
+Ca 2p	params/Ca 2p.csv	peaks/Ca 2p.csv		False	shirley	True

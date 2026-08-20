@@ -1,0 +1,94 @@
+Parameter	value	min	max	vary	expr
+shirley_flat_background	0	0	inf	True	
+shirley_step_height	0	0	inf	True	
+					
+					
+Si_2p_amplitude	2000	0	inf	True	
+Si_2p_sigma	0.2	0.01	3	True	
+Si_2p_gamma	0.02	0	0.3	False	
+Si_2p_gaussian_sigma	0.904651717764909			False	
+Si_2p_center	105	0	inf	True	
+					
+					
+Si_2s_amplitude					Si_2p_amplitude * (0.855) / (0.282 + 0.573)
+Si_2s_sigma	0.2	0.01	3	True	
+Si_2s_gamma	0.02	0	0.3	False	
+Si_2s_gaussian_sigma	0.904651717764909			False	
+Si_2s_center					Si_2p_center + 51.7
+					
+					
+					
+Si_2p_alpha_3_amplitude	8	0	inf	False	Si_2p_amplitude*0.08
+Si_2p_alpha_3_sigma	0.2	0	inf	False	Si_2p_sigma
+Si_2p_alpha_3_gamma	0.02	-inf	inf	False	Si_2p_gamma
+Si_2p_alpha_3_gaussian_sigma	0.2	0	inf	False	Si_2p_gaussian_sigma
+Si_2p_alpha_3_center	91.6	0	inf	False	Si_2p_center-8.4
+Si_2p_alpha_4_amplitude	4.1	0	inf	False	Si_2p_amplitude*0.040999999999999995
+Si_2p_alpha_4_sigma	0.2	0	inf	False	Si_2p_sigma
+Si_2p_alpha_4_gamma	0.02	-inf	inf	False	Si_2p_gamma
+Si_2p_alpha_4_gaussian_sigma	0.2	0	inf	False	Si_2p_gaussian_sigma
+Si_2p_alpha_4_center	89.9	0	inf	False	Si_2p_center-10.1
+Si_2p_alpha_5_amplitude	0.6	0	inf	False	Si_2p_amplitude*0.006
+Si_2p_alpha_5_sigma	0.2	0	inf	False	Si_2p_sigma
+Si_2p_alpha_5_gamma	0.02	-inf	inf	False	Si_2p_gamma
+Si_2p_alpha_5_gaussian_sigma	0.2	0	inf	False	Si_2p_gaussian_sigma
+Si_2p_alpha_5_center	82.4	0	inf	False	Si_2p_center-17.6
+Si_2p_alpha_6_amplitude	0.5	0	inf	False	Si_2p_amplitude*0.005
+Si_2p_alpha_6_sigma	0.2	0	inf	False	Si_2p_sigma
+Si_2p_alpha_6_gamma	0.02	-inf	inf	False	Si_2p_gamma
+Si_2p_alpha_6_gaussian_sigma	0.2	0	inf	False	Si_2p_gaussian_sigma
+Si_2p_alpha_6_center	79.7	0	inf	False	Si_2p_center-20.3
+Si_2p_beta_amplitude	0.5	0	inf	False	Si_2p_amplitude*0.005
+Si_2p_beta_sigma	0.2	0	inf	False	Si_2p_sigma
+Si_2p_beta_gamma	0.02	-inf	inf	False	Si_2p_gamma
+Si_2p_beta_gaussian_sigma	0.2	0	inf	False	Si_2p_gaussian_sigma
+Si_2p_beta_center	51.3	0	inf	False	Si_2p_center-48.7
+Si_2s_alpha_3_amplitude	8	0	inf	False	Si_2s_amplitude*0.08
+Si_2s_alpha_3_sigma	0.2	0	inf	False	Si_2s_sigma
+Si_2s_alpha_3_gamma	0.02	-inf	inf	False	Si_2s_gamma
+Si_2s_alpha_3_gaussian_sigma	0.2	0	inf	False	Si_2s_gaussian_sigma
+Si_2s_alpha_3_center	91.6	0	inf	False	Si_2s_center-8.4
+Si_2s_alpha_4_amplitude	4.1	0	inf	False	Si_2s_amplitude*0.040999999999999995
+Si_2s_alpha_4_sigma	0.2	0	inf	False	Si_2s_sigma
+Si_2s_alpha_4_gamma	0.02	-inf	inf	False	Si_2s_gamma
+Si_2s_alpha_4_gaussian_sigma	0.2	0	inf	False	Si_2s_gaussian_sigma
+Si_2s_alpha_4_center	89.9	0	inf	False	Si_2s_center-10.1
+Si_2s_alpha_5_amplitude	0.6	0	inf	False	Si_2s_amplitude*0.006
+Si_2s_alpha_5_sigma	0.2	0	inf	False	Si_2s_sigma
+Si_2s_alpha_5_gamma	0.02	-inf	inf	False	Si_2s_gamma
+Si_2s_alpha_5_gaussian_sigma	0.2	0	inf	False	Si_2s_gaussian_sigma
+Si_2s_alpha_5_center	82.4	0	inf	False	Si_2s_center-17.6
+Si_2s_alpha_6_amplitude	0.5	0	inf	False	Si_2s_amplitude*0.005
+Si_2s_alpha_6_sigma	0.2	0	inf	False	Si_2s_sigma
+Si_2s_alpha_6_gamma	0.02	-inf	inf	False	Si_2s_gamma
+Si_2s_alpha_6_gaussian_sigma	0.2	0	inf	False	Si_2s_gaussian_sigma
+Si_2s_alpha_6_center	79.7	0	inf	False	Si_2s_center-20.3
+Si_2s_beta_amplitude	0.5	0	inf	False	Si_2s_amplitude*0.005
+Si_2s_beta_sigma	0.2	0	inf	False	Si_2s_sigma
+Si_2s_beta_gamma	0.02	-inf	inf	False	Si_2s_gamma
+Si_2s_beta_gaussian_sigma	0.2	0	inf	False	Si_2s_gaussian_sigma
+Si_2s_beta_center	51.3	0	inf	False	Si_2s_center-48.7
+Si_2p_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_gaussian_sigma*1.1774
+Si_2p_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_sigma*(2+Si_2p_gamma*2.5135+(Si_2p_gamma*3.6398)**4)
+Si_2s_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_gaussian_sigma*1.1774
+Si_2s_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_sigma*(2+Si_2s_gamma*2.5135+(Si_2s_gamma*3.6398)**4)
+Si_2p_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_alpha_3_gaussian_sigma*1.1774
+Si_2p_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_alpha_3_sigma*(2+Si_2p_alpha_3_gamma*2.5135+(Si_2p_alpha_3_gamma*3.6398)**4)
+Si_2p_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_alpha_4_gaussian_sigma*1.1774
+Si_2p_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_alpha_4_sigma*(2+Si_2p_alpha_4_gamma*2.5135+(Si_2p_alpha_4_gamma*3.6398)**4)
+Si_2p_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_alpha_5_gaussian_sigma*1.1774
+Si_2p_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_alpha_5_sigma*(2+Si_2p_alpha_5_gamma*2.5135+(Si_2p_alpha_5_gamma*3.6398)**4)
+Si_2p_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_alpha_6_gaussian_sigma*1.1774
+Si_2p_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_alpha_6_sigma*(2+Si_2p_alpha_6_gamma*2.5135+(Si_2p_alpha_6_gamma*3.6398)**4)
+Si_2p_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2p_beta_gaussian_sigma*1.1774
+Si_2p_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2p_beta_sigma*(2+Si_2p_beta_gamma*2.5135+(Si_2p_beta_gamma*3.6398)**4)
+Si_2s_alpha_3_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_alpha_3_gaussian_sigma*1.1774
+Si_2s_alpha_3_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_alpha_3_sigma*(2+Si_2s_alpha_3_gamma*2.5135+(Si_2s_alpha_3_gamma*3.6398)**4)
+Si_2s_alpha_4_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_alpha_4_gaussian_sigma*1.1774
+Si_2s_alpha_4_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_alpha_4_sigma*(2+Si_2s_alpha_4_gamma*2.5135+(Si_2s_alpha_4_gamma*3.6398)**4)
+Si_2s_alpha_5_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_alpha_5_gaussian_sigma*1.1774
+Si_2s_alpha_5_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_alpha_5_sigma*(2+Si_2s_alpha_5_gamma*2.5135+(Si_2s_alpha_5_gamma*3.6398)**4)
+Si_2s_alpha_6_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_alpha_6_gaussian_sigma*1.1774
+Si_2s_alpha_6_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_alpha_6_sigma*(2+Si_2s_alpha_6_gamma*2.5135+(Si_2s_alpha_6_gamma*3.6398)**4)
+Si_2s_beta_gaussian_fwhm	0.47096	-inf	inf	False	2*Si_2s_beta_gaussian_sigma*1.1774
+Si_2s_beta_lorentzian_fwhm	0.410059616426256	-inf	inf	False	Si_2s_beta_sigma*(2+Si_2s_beta_gamma*2.5135+(Si_2s_beta_gamma*3.6398)**4)

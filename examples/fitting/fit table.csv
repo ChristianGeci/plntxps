@@ -1,0 +1,9 @@
+label	C 1s	Si	Ca 2p	do fit
+first sample	0	1		True
+2 hr treated	2	1		False
+3 hr treated	3	2		False
+untreated	5	4	3.0	False
+3 hr treated 2	3	1	2.0	False
+3 hr treated 2 - 2.5	3	1	2.0	False
+3 hr treated 3.125 - 3.5625	3	1	2.0	False
+3 hr treated 4.25 to 4.875	3	1	2.0	False
