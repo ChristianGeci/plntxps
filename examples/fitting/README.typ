@@ -2,6 +2,10 @@
 
 #title()
 
+You should be able to reproduce the fitting I did here starting only with a blank Jupyter notebook and the raw xps spectra.
+
++ Import `pandas` and `plntxps`
+
 + Begin by calling `make_experiment_table()`
   - Pass a directory of xps data files and the name of the output `.csv` file as arguments.
   - The experiment table essentially associates .xy data files with an alias and any additional data the user wants to assign (e.g. calcination temperature, treatment time, etc.)
@@ -20,7 +24,9 @@
 + Take a look at your spectra and consider which regions you'd like to fit.
 
 + Make a blank region table by calling `make_blank_region_table()`.
- - The region table defines which fitting strategies will be employed, e.g. a fit of the C 1s region, a fit of the Ca 2p region, etc.
+ + Setup empty overrides. // Move to beginning?
+  - you will need a directory to read from
+  - These will be used later to triage any fits that went wrong- The region table defines which fitting strategies will be employed, e.g. a fit of the C 1s region, a fit of the Ca 2p region, etc.
 + Fill out the `region` column of the region table manually.
 + Call `fill_out_region_table()`
   - Supply the region table path, the peaks directory path, and the params directory path as arguments.
