@@ -218,13 +218,18 @@ def fill_out_region_table(filepath, peaks_dir_path, params_dir_path):
         mkdir(peaks_dir_path)
     if not Path(params_dir_path).is_dir():
         mkdir(params_dir_path)
-    # how to prevent unwanted overwriting?
     region_table = pd.read_csv(filepath, sep = '\t')
     peak_paths = []
     params_paths = []
     for index, row in region_table.iterrows():
-        peak_path = f"{peaks_dir_path}/{row['region']}.csv"
-        params_path = f"{params_dir_path}/{row['region']}.csv"
+        peak_path = (
+            f"{peaks_dir_path}/{row['region']}.csv" 
+            if pd.isna(row['peaks file']) else row['peaks file']
+        )
+        params_path = (
+            f"{params_dir_path}/{row['region']}.csv"
+            if pd.isna(row['params file']) else row['params file']
+        )
         peak_paths.append(peak_path)
         params_paths.append(params_path)
     region_table['params file'] = params_paths
