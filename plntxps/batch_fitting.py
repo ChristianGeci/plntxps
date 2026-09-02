@@ -255,6 +255,11 @@ def make_fit_table(experiment_table, region_table, filepath):
         [fit_table, pd.DataFrame(new_rows)]
         if not df.empty
     ])
+    new_columns = []
+    for region in region_table['region']:
+        if region in list(fit_table.keys()): continue
+        fit_table[region] = None
+    fit_table['do fit'] = fit_table.pop('do fit')
     fit_table.to_csv(filepath, sep = '\t', index = False)
     return
 
