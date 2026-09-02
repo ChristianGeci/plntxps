@@ -42,7 +42,7 @@ class SpectrumInfo:
 def get_spectrum_info(header):
     comment = get_comment(header)
     analyzer_lens = get_info(header, "Analyzer Lens")
-    pass_energy = int(get_info(header, "Pass Energy"))
+    pass_energy = float(get_info(header, "Pass Energy"))
     excitation_energy = float(get_info(header, "Excitation Energy"))
     analyzer_slit = get_info(header, "Analyzer Slit")
     resolution = calculate_resolution(
