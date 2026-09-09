@@ -140,21 +140,26 @@ class XpsBatchFit:
             logger.log(f"starting fit of {region}")
             peak_table = self.peak_tables[region]
             for experiment in self.all_fitted_experiments:
-                if not self.experiment_should_be_fit(experiment): continue
-                logger.log(f"\tstarting fit of {experiment}")
-                params_path = self.get_params_path(experiment, region)
-                bg_type = self.get_bg_type(experiment, region)
-                guess_shirley = self.get_guess_shirley(experiment, region)
-                spectrum = self.get_spectrum(experiment, region)
-                if type(spectrum) == type(None): continue
-                fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
-                fit = do_fit(
-                    spectrum.eV, spectrum.counts, fit_model,
-                    params_path, guess_shirley)
-                plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites, peak_table)
-                plt.savefig(f"{output_dir}/{region}/{experiment}.svg")
-                plt.close()
-                save_modelresult(fit, f"{output_dir}/{region}/{experiment}.json")
+                try:
+                    if not self.experiment_should_be_fit(experiment): continue
+                    logger.log(f"\tstarting fit of {experiment}")
+                    params_path = self.get_params_path(experiment, region)
+                    bg_type = self.get_bg_type(experiment, region)
+                    guess_shirley = self.get_guess_shirley(experiment, region)
+                    spectrum = self.get_spectrum(experiment, region)
+                    if type(spectrum) == type(None): continue
+                    fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
+                    fit = do_fit(
+                        spectrum.eV, spectrum.counts, fit_model,
+                        params_path, guess_shirley)
+                    plot_fit_result(
+                        spectrum.eV, spectrum.counts,
+                        fit, self.satellites, peak_table)
+                    plt.savefig(f"{output_dir}/{region}/{experiment}.svg")
+                    plt.close()
+                    save_modelresult(fit, f"{output_dir}/{region}/{experiment}.json")
+                except Exception as e:
+                    logger.log(f"\tfailed fit of {experiment}: {e}")
 
 def xps_batch_fit(experiment_table_filepath, region_table_filepath):
     experiment_table = pd.read_csv(experiment_table_filepath, sep = '\t')
