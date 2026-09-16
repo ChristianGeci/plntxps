@@ -1,46 +1,19 @@
 import numpy as np
-from lmfit.lineshapes import gaussian, thermal_distribution
+from lmfit.lineshapes import gaussian
 from lmfit import Model
 import lmfit
 from lmfit.models import guess_from_peak
 from scipy.signal import convolve as sc_convolve
-import scipy.constants
 
 
-def fft_convolve(data, kernel, is_binding_energy=False):
-    """
-    Calculates the convolution of a data array with a kernel by using the convolution theorem and thereby
-    transforming the time-consuming convolution operation into a multiplication of FFTs.
-    The convolution using this approach is done using the `scipy.signal.convolve()` function with the `method="fft"` attribute.
-    To suppress edge effects and generate a valid convolution on the full data range, the input dataset is
-    extended at the edges.
-
-    Parameters
-    ----------
-    data: array-like
-        1D-array containing the data to convolve
-    kernel: array-like
-        1D-array which defines the kernel used for convolution. If binding energy scale is used, the kernel is inverted/flipped.
-    is_binding_energy: boolean
-        Boolean determining type of energy scale which determines the orientation of the kernel
-
-    Returns
-    ---------
-    array-type
-        convolution of a data array with a kernel array
-
-    See Also
-    ---------
-    scipy.signal.convolve()
-    """
-    if is_binding_energy:
-        kernel=kernel[::-1]
-    min_num_pts = min(len(data), len(kernel))
-    padding = np.ones(min_num_pts)
+def fft_convolve(data, kernel):
+    padding_length = min(len(data), len(kernel))
+    padding = np.ones(padding_length)
     padded_data = np.concatenate((padding * data[0], data, padding * data[-1]))
-    out = sc_convolve(padded_data, kernel, mode='valid', method="fft")
-    n_start_data = int((len(out) - min_num_pts) / 2)
-    return (out[n_start_data:])[:min_num_pts]
+    result = sc_convolve(padded_data, kernel, mode='valid', method="fft")
+    slice_start = int((len(result) - padding_length) / 2)
+    truncated_result = (result[slice_start:])[:padding_length]
+    return truncated_result
 
 def normalized_gaussian_broadening(x, sigma):
     normalization_factor = 1 / (np.sqrt(2 * np.pi) * sigma)
@@ -48,23 +21,21 @@ def normalized_gaussian_broadening(x, sigma):
     return gaussian_curve * normalization_factor
 
 tiny = 1.0e-15
-def doniach(x, area=1.0, center=0, sigma=1.0, gamma=0.0):
+def doniach(x, amplitude=1.0, center=0, sigma=1.0, gamma=0.0):
     arg = -(x-center)/max(tiny, sigma)
     gm1 = (1.0 - gamma)
-    scale = area/max(tiny, (sigma**gm1))
+    scale = amplitude/max(tiny, (sigma**gm1))
     return scale*np.cos(np.pi*gamma/2 + gm1*np.arctan(arg))/(1 + arg**2)**(gm1/2)
 
-def singlett(x, area, sigma, gamma, gaussian_sigma, center):
-    is_binding_energy = x[-1] < x[0]
+def conv_gaussian_doniach_sunjic(x, area, sigma, gamma, gaussian_sigma, center):
     conv_temp = fft_convolve(
-        doniach(x, area=1, center=center, sigma=sigma, gamma=gamma),
-        normalized_gaussian_broadening(x, gaussian_sigma),
-        is_binding_energy=is_binding_energy)
+        doniach(x, amplitude=1, center=center, sigma=sigma, gamma=gamma),
+        normalized_gaussian_broadening(x, gaussian_sigma))
     return area * conv_temp / np.abs(np.trapezoid(conv_temp, x = x))
 
 class ConvGaussianDonaichSunjic(lmfit.model.Model):
     def __init__(self, *args, **kwargs):
-        super().__init__(singlett, *args, **kwargs)
+        super().__init__(conv_gaussian_doniach_sunjic, *args, **kwargs)
         self._set_paramhints_prefix()
 
     def _set_paramhints_prefix(self):
