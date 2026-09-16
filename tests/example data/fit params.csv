@@ -1,30 +1,30 @@
 Parameter	value	min	max	vary	expr
-example_amplitude	100	0	inf	True	
+example_area	100	0	inf	True	
 example_sigma	0.2	0	inf	True	
 example_gamma	0.02	-inf	inf	True	
 example_gaussian_sigma	0.2	0	inf	True	
 example_center	250	0	inf	True	
-example_alpha_3_amplitude	8	0	inf	False	example_amplitude*0.08
+example_alpha_3_area	8	0	inf	False	example_area*0.08
 example_alpha_3_sigma	0.2	0	inf	False	example_sigma
 example_alpha_3_gamma	0.02	-inf	inf	False	example_gamma
 example_alpha_3_gaussian_sigma	0.2	0	inf	False	example_gaussian_sigma
 example_alpha_3_center	91.6	0	inf	False	example_center-8.4
-example_alpha_4_amplitude	4.1	0	inf	False	example_amplitude*0.040999999999999995
+example_alpha_4_area	4.1	0	inf	False	example_area*0.040999999999999995
 example_alpha_4_sigma	0.2	0	inf	False	example_sigma
 example_alpha_4_gamma	0.02	-inf	inf	False	example_gamma
 example_alpha_4_gaussian_sigma	0.2	0	inf	False	example_gaussian_sigma
 example_alpha_4_center	89.9	0	inf	False	example_center-10.1
-example_alpha_5_amplitude	0.6	0	inf	False	example_amplitude*0.006
+example_alpha_5_area	0.6	0	inf	False	example_area*0.006
 example_alpha_5_sigma	0.2	0	inf	False	example_sigma
 example_alpha_5_gamma	0.02	-inf	inf	False	example_gamma
 example_alpha_5_gaussian_sigma	0.2	0	inf	False	example_gaussian_sigma
 example_alpha_5_center	82.4	0	inf	False	example_center-17.6
-example_alpha_6_amplitude	0.5	0	inf	False	example_amplitude*0.005
+example_alpha_6_area	0.5	0	inf	False	example_area*0.005
 example_alpha_6_sigma	0.2	0	inf	False	example_sigma
 example_alpha_6_gamma	0.02	-inf	inf	False	example_gamma
 example_alpha_6_gaussian_sigma	0.2	0	inf	False	example_gaussian_sigma
 example_alpha_6_center	79.7	0	inf	False	example_center-20.3
-example_beta_amplitude	0.5	0	inf	False	example_amplitude*0.005
+example_beta_area	0.5	0	inf	False	example_area*0.005
 example_beta_sigma	0.2	0	inf	False	example_sigma
 example_beta_gamma	0.02	-inf	inf	False	example_gamma
 example_beta_gaussian_sigma	0.2	0	inf	False	example_gaussian_sigma
