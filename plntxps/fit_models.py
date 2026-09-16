@@ -48,39 +48,29 @@ def normalized_gaussian_broadening(x, sigma):
     return gaussian_curve * normalization_factor
 
 tiny = 1.0e-15
-
-def doniach(x, amplitude=1.0, center=0, sigma=1.0, gamma=0.0):
-    """Return a Doniach Sunjic asymmetric lineshape.
-
-    doniach(x, amplitude, center, sigma, gamma) =
-        amplitude / sigma^(1-gamma) *
-        cos(pi*gamma/2 + (1-gamma) arctan((x-center)/sigma) /
-        (sigma**2 + (x-center)**2)**[(1-gamma)/2]
-
-    For example used in photo-emission; see
-    http://www.casaxps.com/help_manual/line_shapes.htm for more information.
-
-    """
+def doniach(x, area=1.0, center=0, sigma=1.0, gamma=0.0):
     arg = -(x-center)/max(tiny, sigma)
     gm1 = (1.0 - gamma)
-    scale = amplitude/max(tiny, (sigma**gm1))
+    scale = area/max(tiny, (sigma**gm1))
     return scale*np.cos(np.pi*gamma/2 + gm1*np.arctan(arg))/(1 + arg**2)**(gm1/2)
-def singlett(x, amplitude, sigma, gamma, gaussian_sigma, center):
+
+def singlett(x, area, sigma, gamma, gaussian_sigma, center):
     is_binding_energy = x[-1] < x[0]
     conv_temp = fft_convolve(
-        doniach(x, amplitude=1, center=center, sigma=sigma, gamma=gamma),
+        doniach(x, area=1, center=center, sigma=sigma, gamma=gamma),
         normalized_gaussian_broadening(x, gaussian_sigma),
         is_binding_energy=is_binding_energy)
-    return amplitude * conv_temp / np.abs(np.trapezoid(conv_temp, x = x))
+    return area * conv_temp / np.abs(np.trapezoid(conv_temp, x = x))
+
 class ConvGaussianDonaichSunjic(lmfit.model.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(singlett, *args, **kwargs)
         self._set_paramhints_prefix()
 
     def _set_paramhints_prefix(self):
-        self.set_param_hint('amplitude', value=100, min=0)
+        self.set_param_hint('area', value=100, min=0)
         self.set_param_hint('sigma', value=0.2, min=0)
-        self.set_param_hint('gamma', value=0.02)
+        self.set_param_hint('gamma', value=0.02, min=0.00, max = 0.3)
         self.set_param_hint('gaussian_sigma', value=0.2, min=0)
         self.set_param_hint('center', value=100, min=0)
         g_fwhm_expr = '2*{pre:s}gaussian_sigma*1.1774'
@@ -93,7 +83,7 @@ class ConvGaussianDonaichSunjic(lmfit.model.Model):
             return
         doniach_pars = guess_from_peak(Model(doniach), data, x, negative=False)
         gaussian_sigma = (doniach_pars["sigma"].value)
-        params = self.make_params(amplitude=doniach_pars["amplitude"].value, sigma=doniach_pars["sigma"].value,
+        params = self.make_params(area=doniach_pars["area"].value, sigma=doniach_pars["sigma"].value,
                                   gamma=doniach_pars["gamma"].value, gaussian_sigma=gaussian_sigma,
                                   center=doniach_pars["center"].value)
         return lmfit.models.update_param_vals(params, self.prefix, **kwargs)

@@ -53,7 +53,7 @@ def setup_background(bg_type):
             prefix = "shirley_",
             independent_vars = ['y'])
     elif bg_type == "tougaard":
-        raise NotImplementedError("Tougaard Backround Not Yet Implemented")
+        raise NotImplementedError("Tougaard background not yet implemented")
     elif bg_type == "none":
         return None
     else:
