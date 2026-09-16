@@ -1,0 +1,6 @@
+Parameter	value	min	max	vary	expr
+example_amplitude	100	0	inf	True	
+example_sigma	0.5	0	inf	True	
+example_gamma	0.3	-inf	inf	True	
+example_gaussian_sigma	0.9	0	inf	True	
+example_center	250	0	inf	True	
