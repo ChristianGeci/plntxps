@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import lmfit
 import lmfext
-from lmfitxps import models
+from .fit_models import ConvGaussianDonaichSunjic
 import matplotlib.pyplot as plt
 from .spectrum import Spectrum
 from .background_subtraction import parametric_shirley_background
@@ -39,7 +39,7 @@ def setup_satellite_models(peak_table: pd.DataFrame, satellites):
         if not row['has satellites']:
             continue
         for n in range(1, len(satellites)):
-            satellite_model = models.ConvGaussianDoniachSinglett(
+            satellite_model = ConvGaussianDonaichSunjic(
                 prefix = f"{peak}_{satellites[n]['name']}_",
                 independent_vars = ["x"])
             set_satellite_param_hints(satellite_model, peak, satellites[n])
@@ -53,7 +53,7 @@ def setup_background(bg_type):
             prefix = "shirley_",
             independent_vars = ['y'])
     elif bg_type == "tougaard":
-        return models.TougaardBG(independent_vars = ["x", "y"], prefix = 'tougaard_')
+        raise NotImplementedError("Tougaard Backround Not Yet Implemented")
     elif bg_type == "none":
         return None
     else:
@@ -63,7 +63,7 @@ def setup_main_peaks(peak_table: pd.DataFrame):
     result = []
     for index, row in peak_table.iterrows():
         peak = process_peak_name(row['peak name'])
-        result.append(models.ConvGaussianDoniachSinglett(
+        result.append(ConvGaussianDonaichSunjic(
             prefix = peak + '_', independent_vars = ["x"]))
     return result
 
