@@ -1,5 +1,5 @@
 import numpy as np
-from lmfit.lineshapes import doniach, gaussian, thermal_distribution
+from lmfit.lineshapes import gaussian, thermal_distribution
 from lmfit import Model
 import lmfit
 from lmfit.models import guess_from_peak
@@ -47,6 +47,24 @@ def normalized_gaussian_broadening(x, sigma):
     gaussian_curve = gaussian(x, amplitude = 1, center = np.mean(x), sigma = sigma)
     return gaussian_curve * normalization_factor
 
+tiny = 1.0e-15
+
+def doniach(x, amplitude=1.0, center=0, sigma=1.0, gamma=0.0):
+    """Return a Doniach Sunjic asymmetric lineshape.
+
+    doniach(x, amplitude, center, sigma, gamma) =
+        amplitude / sigma^(1-gamma) *
+        cos(pi*gamma/2 + (1-gamma) arctan((x-center)/sigma) /
+        (sigma**2 + (x-center)**2)**[(1-gamma)/2]
+
+    For example used in photo-emission; see
+    http://www.casaxps.com/help_manual/line_shapes.htm for more information.
+
+    """
+    arg = -(x-center)/max(tiny, sigma)
+    gm1 = (1.0 - gamma)
+    scale = amplitude/max(tiny, (sigma**gm1))
+    return scale*np.cos(np.pi*gamma/2 + gm1*np.arctan(arg))/(1 + arg**2)**(gm1/2)
 def singlett(x, amplitude, sigma, gamma, gaussian_sigma, center):
     is_binding_energy = x[-1] < x[0]
     conv_temp = fft_convolve(
