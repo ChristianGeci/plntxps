@@ -16,3 +16,4 @@ tests/.jupyter_ystore.db
 .ipynb_checkpoints
 collaboration_sessions.json
 .jupyter_ystore.db
+/examples/fitting/README.pdf
