@@ -5,6 +5,7 @@ import lmfit
 from lmfit.models import guess_from_peak
 from scipy.signal import convolve as sc_convolve
 
+# much of this file is adapted from lineshapes.py in the package `lmfitxps` by Julian Andreas Hochhaus (https://github.com/Julian-Hochhaus/lmfitxps)
 
 def fft_convolve(data, kernel):
     padding_length = min(len(data), len(kernel))
