@@ -3,7 +3,7 @@ from lmfit.lineshapes import gaussian
 from lmfit import Model
 import lmfit
 from lmfit.models import guess_from_peak
-from scipy.signal import convolve as sc_convolve
+from scipy.signal import convolve
 
 # much of this file is adapted from lineshapes.py in the package `lmfitxps` by Julian Andreas Hochhaus (https://github.com/Julian-Hochhaus/lmfitxps)
 
@@ -11,7 +11,7 @@ def fft_convolve(data, kernel):
     padding_length = min(len(data), len(kernel))
     padding = np.ones(padding_length)
     padded_data = np.concatenate((padding * data[0], data, padding * data[-1]))
-    result = sc_convolve(padded_data, kernel, mode='valid', method="fft")
+    result = convolve(padded_data, kernel, mode='valid', method="fft")
     slice_start = int((len(result) - padding_length) / 2)
     truncated_result = (result[slice_start:])[:padding_length]
     return truncated_result
