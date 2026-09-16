@@ -84,8 +84,9 @@ def setup_fit_model(peak_table: pd.DataFrame, bg_type, satellites):
 
     return fit_model
 
-def setup_fit_params(peak_table: pd.DataFrame, params_path: str,
-              satellites = None, bg_type = "shirley"):
+def setup_fit_params(
+        peak_table: pd.DataFrame, params_path: str,
+        satellites = None, bg_type = "shirley"):
     fit_model = setup_fit_model(peak_table, bg_type, satellites)
     lmfext.make_params_file(fit_model, params_path)
     return 
