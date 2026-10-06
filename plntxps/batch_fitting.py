@@ -54,7 +54,7 @@ class XpsBatchFit:
         lower_bound = float(parsed_string[0])
         upper_bound = float(parsed_string[1])
         return lower_bound, upper_bound
-    def get_spectrum(self, experiment, region):
+    def get_spectrum(self, experiment, region) -> Spectrum:
         spectrum_index = (
             self.fit_table.query('label == @experiment')
             [region].item()
@@ -129,6 +129,15 @@ class XpsBatchFit:
             spectrum.eV, spectrum.counts, fit_model, params_path, guess_shirley)
         plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites, peak_table)
         return fit
+
+    def plot_fit_result(self, experiment, region, fit_result, subtract_background = False):
+        peak_table = self.peak_tables[region]
+        spectrum = self.get_spectrum(experiment, region)
+        if subtract_background:
+            plot_background_subtracted_fit_result(spectrum.eV, spectrum.counts, fit_result, self.satellites, peak_table)
+        else:
+            plot_fit_result(spectrum.eV, spectrum.counts, fit_result, self.satellites, peak_table)
+        return
 
     def do_batch_fit(self, output_dir, logger: Logger = NullLogger()):
         try: mkdir(output_dir)

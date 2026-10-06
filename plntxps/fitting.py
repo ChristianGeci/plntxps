@@ -176,6 +176,42 @@ def plot_fit_result(eV, counts, fit_result, satellites, peak_table, custom_backg
 
     plt.legend(loc = 'upper left', bbox_to_anchor = (1, 1))
 
+def plot_background_subtracted_fit_result(
+        eV, counts, fit_result, satellites, peak_table, custom_background = None):
+    components = fit_result.eval_components(x = eV, y = counts)
+    boilerplate()
+    if 'tougaard_' in components.keys():
+        background = components['tougaard_']
+        background_name = 'tougaard_'
+    elif 'shirley_' in components.keys():
+        background = components['shirley_']
+        background_name = 'shirley_'
+    elif type(custom_background) != type(None):
+        background = custom_background
+        background_name = 'custom'
+    else:
+        background = np.zeros(len(eV))
+        background_name = 'none'
+    
+    if background_name == "custom":
+        plt.plot(eV, fit_result.best_fit, label = 'fit')
+        plt.plot(eV, background, label = 'background', ls = 'dashed')
+    else:
+        plt.plot(eV, fit_result.best_fit - background, label = 'fit')
+
+    plt.plot(eV, counts - background, color = 'black', label = 'data')
+    if type(satellites) != type(None):
+        grouped_components = group_components(components, satellites, peak_table)
+    else:
+        grouped_components = components
+    for name, curve in grouped_components.items():
+        if name == "shirley_":
+            continue
+        else:
+            plt.plot(eV, curve, label = name[:-1], ls = 'dashed')
+
+    plt.legend(loc = 'upper left', bbox_to_anchor = (1, 1))
+
 def fit_procedure(
         eV: np.ndarray[float], counts: np.ndarray[float],
         peak_table: pd.DataFrame, params_path: str,
