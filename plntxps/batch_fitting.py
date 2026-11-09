@@ -185,7 +185,7 @@ class XpsBatchFit:
                     spectra = self.get_spectra(experiment, region)
                     for index, spectrum in enumerate(spectra):
                         if len(spectra) > 1:
-                            logger.log(f"spectrum {index}")
+                            logger.log("\t"*2 + f"spectrum {index}")
                         if type(spectrum) == type(None): continue
                         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
                         fit = do_fit(
@@ -193,7 +193,7 @@ class XpsBatchFit:
                             params_path, guess_shirley)
                         plot_fit_result(
                             spectrum.eV, spectrum.counts,
-                            fit, self.satellites, peak_table, index = index)
+                            fit, self.satellites, peak_table)
                         plt.savefig(f"{output_dir}/{region}/{experiment} ({index}).svg")
                         plt.close()
                         save_modelresult(fit, f"{output_dir}/{region}/{experiment} ({index}).json")
