@@ -54,22 +54,45 @@ class XpsBatchFit:
         lower_bound = float(parsed_string[0])
         upper_bound = float(parsed_string[1])
         return lower_bound, upper_bound
-    def get_spectrum(self, experiment, region) -> Spectrum:
-        spectrum_index = (
+    # def get_spectrum(self, experiment, region) -> Spectrum:
+        # spectrum_index = (
+            # self.fit_table.query('label == @experiment')
+            # [region].item()
+        # )
+        # if pd.isna(spectrum_index):
+            # return None
+        # spectrum = (
+            # self.experiment_table.query('label == @experiment')
+            # ['data'].item().spectra[int(spectrum_index)]
+        # )
+        # if self.slice_requested(region):
+            # slice_lower_bound, slice_upper_bound = self.get_slice_bounds(
+                # experiment, region)
+            # spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
+        # return spectrum
+    def get_spectra(self, experiment, region) -> List[Spectrum]:
+        spectrum_indices = (
             self.fit_table.query('label == @experiment')
             [region].item()
-        )
-        if pd.isna(spectrum_index):
-            return None
-        spectrum = (
+        ).strip().split(',')
+        spectrum_indices = [
+            index for index in spectrum_indices
+            if not pd.isna(index)
+        ]
+        spectra = [
             self.experiment_table.query('label == @experiment')
-            ['data'].item().spectra[int(spectrum_index)]
-        )
+            ['data'].item().spectra[int(index)]
+            for index in spectrum_indices
+        ]
         if self.slice_requested(region):
             slice_lower_bound, slice_upper_bound = self.get_slice_bounds(
                 experiment, region)
-            spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
-        return spectrum
+            spectra = [
+                spectrum.slice(slice_lower_bound, slice_upper_bound)
+                for spectrum in spectra
+            ]
+        return spectra
+
     # todo: should the three functions below be consilidated?
     def get_params_path(self, experiment, region):
         override = self.get_override(experiment, region, "params file")
@@ -114,12 +137,12 @@ class XpsBatchFit:
     def all_fitted_experiments(self):
         return list(self.fit_table['label'])
 
-    def check_guess(self, experiment, region):
+    def check_guess(self, experiment, region, index = 0):
         peak_table = self.peak_tables[region]
         params_path = self.get_params_path(experiment, region)
         bg_type = self.get_bg_type(experiment, region)
         guess_shirley = self.get_guess_shirley(experiment, region)
-        spectrum = self.get_spectrum(experiment, region)
+        spectrum = self.get_spectra(experiment, region)[index]
         print(f"resolution: {spectrum.info.resolution}")
         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
         plot_initial_guess(
@@ -130,9 +153,9 @@ class XpsBatchFit:
         plot_fit_result(spectrum.eV, spectrum.counts, fit, self.satellites, peak_table)
         return fit
 
-    def plot_fit_result(self, experiment, region, fit_result, subtract_background = False):
+    def plot_fit_result(self, experiment, region, fit_result, subtract_background = False, index = 0):
         peak_table = self.peak_tables[region]
-        spectrum = self.get_spectrum(experiment, region)
+        spectrum = self.get_spectra(experiment, region)[index]
         if subtract_background:
             plot_background_subtracted_fit_result(spectrum.eV, spectrum.counts, fit_result, self.satellites, peak_table)
         else:
@@ -155,18 +178,19 @@ class XpsBatchFit:
                     params_path = self.get_params_path(experiment, region)
                     bg_type = self.get_bg_type(experiment, region)
                     guess_shirley = self.get_guess_shirley(experiment, region)
-                    spectrum = self.get_spectrum(experiment, region)
-                    if type(spectrum) == type(None): continue
-                    fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
-                    fit = do_fit(
-                        spectrum.eV, spectrum.counts, fit_model,
-                        params_path, guess_shirley)
-                    plot_fit_result(
-                        spectrum.eV, spectrum.counts,
-                        fit, self.satellites, peak_table)
-                    plt.savefig(f"{output_dir}/{region}/{experiment}.svg")
-                    plt.close()
-                    save_modelresult(fit, f"{output_dir}/{region}/{experiment}.json")
+                    spectra = self.get_spectrum(experiment, region)
+                    for index, spectrum in enumerate(spectra):
+                        if type(spectrum) == type(None): continue
+                        fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
+                        fit = do_fit(
+                            spectrum.eV, spectrum.counts, fit_model,
+                            params_path, guess_shirley)
+                        plot_fit_result(
+                            spectrum.eV, spectrum.counts,
+                            fit, self.satellites, peak_table, index = index)
+                        plt.savefig(f"{output_dir}/{region}/{experiment} ({index}).svg")
+                        plt.close()
+                        save_modelresult(fit, f"{output_dir}/{region}/{experiment} ({index}).json")
                 except Exception as e:
                     logger.log(f"\tfailed fit of {experiment}: {e}")
 
