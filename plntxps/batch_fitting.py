@@ -178,12 +178,14 @@ class XpsBatchFit:
             for experiment in self.all_fitted_experiments:
                 try:
                     if not self.experiment_should_be_fit(experiment): continue
-                    logger.log(f"\tstarting fit of {experiment} ({index})")
+                    logger.log(f"\tstarting fit of {experiment}")
                     params_path = self.get_params_path(experiment, region)
                     bg_type = self.get_bg_type(experiment, region)
                     guess_shirley = self.get_guess_shirley(experiment, region)
                     spectra = self.get_spectra(experiment, region)
                     for index, spectrum in enumerate(spectra):
+                        if len(spectra) > 1:
+                            logger.log(f"spectrum {index}")
                         if type(spectrum) == type(None): continue
                         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
                         fit = do_fit(
