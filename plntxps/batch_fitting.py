@@ -9,6 +9,7 @@ import pandas as pd
 from .logger import Logger, NullLogger
 from .fitting import *
 from pathlib import Path
+from .helper_functions import is_float
 
 @dataclass
 class FitInput:
@@ -54,6 +55,7 @@ class XpsBatchFit:
         lower_bound = float(parsed_string[0])
         upper_bound = float(parsed_string[1])
         return lower_bound, upper_bound
+    # todo: remove
     # def get_spectrum(self, experiment, region) -> Spectrum:
         # spectrum_index = (
             # self.fit_table.query('label == @experiment')
@@ -70,14 +72,16 @@ class XpsBatchFit:
                 # experiment, region)
             # spectrum = spectrum.slice(slice_lower_bound, slice_upper_bound)
         # return spectrum
-    def get_spectra(self, experiment, region) -> List[Spectrum]:
-        spectrum_indices = (
+    def get_spectra(self, experiment, region) -> list[Spectrum]:
+        cell_entry = (
             self.fit_table.query('label == @experiment')
             [region].item()
-        ).strip().split(',')
+        )
+        if pd.isna(cell_entry): return []
+        spectrum_indices = str(cell_entry).strip().split(',')
         spectrum_indices = [
-            index for index in spectrum_indices
-            if not pd.isna(index)
+            float(index) for index in spectrum_indices
+            if is_float(index)
         ]
         spectra = [
             self.experiment_table.query('label == @experiment')
@@ -174,11 +178,11 @@ class XpsBatchFit:
             for experiment in self.all_fitted_experiments:
                 try:
                     if not self.experiment_should_be_fit(experiment): continue
-                    logger.log(f"\tstarting fit of {experiment}")
+                    logger.log(f"\tstarting fit of {experiment} ({index})")
                     params_path = self.get_params_path(experiment, region)
                     bg_type = self.get_bg_type(experiment, region)
                     guess_shirley = self.get_guess_shirley(experiment, region)
-                    spectra = self.get_spectrum(experiment, region)
+                    spectra = self.get_spectra(experiment, region)
                     for index, spectrum in enumerate(spectra):
                         if type(spectrum) == type(None): continue
                         fit_model = setup_fit_model(peak_table, bg_type, self.satellites)
